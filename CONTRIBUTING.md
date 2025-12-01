@@ -1,9 +1,8 @@
 ### Contributing Guide
 
-This repository contains materials related to the Roman WFI Reference File Pipeline. Through at least the entire calendar year of 2026, the development team’s primary focus is achieving operational stability. As a result, the maintainers may or may not be able to respond to GitHub Issues or discussions submitted to this repository. 
+This repository contains materials related to the Roman Space Telescope WFI Reference File Pipeline (RFP). The development team’s primary focus is achieving operational stability after launch and through commissioning into operations. As a result, the maintainers may or may not be able to respond to GitHub Issues or discussions submitted to this repository. 
 
-We do appreciate community interest however. For questions, feedback, or support requests, the best and most reliable way to reach the team is through the Roman Helpdes:
-https://stsci.service-now.com/roman
+We do appreciate Roman mission community interest. For questions, feedback, or support requests, the best and most reliable way to reach the team is through the Roman Helpdesk: https://stsci.service-now.com/roman. This is the preferred method of communication for Project Infrastructure Team (PIT) members, WFI Science Teams, and individuals at the Science Support Center at IPAC (SSC). 
 
 Thank you for your understanding and patience during this phase of mission development.
 
