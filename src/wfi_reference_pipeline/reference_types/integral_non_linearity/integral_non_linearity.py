@@ -141,20 +141,12 @@ class IntegralNonLinearity(ReferenceType):
         """
         Build the Roman datamodel tree for the integral non-linearity reference.
         """
-        try:
-            # Placeholder until official datamodel exists
-            inl_ref = rds.IntegralNonLinearity()
-        except AttributeError:
-            inl_ref = {"meta": {}, 
-                       "inl_table": {},
-                       "value": {}
-                       }
+        inl_datamodel = rds.IntegralnonlinearityRef()
+        inl_datamodel["meta"] = self.meta_data.export_asdf_meta()
+        inl_datamodel["inl_table"] = self._make_inl_table()
+        inl_datamodel["value"] = self.value_array
 
-        inl_ref["meta"] = self.meta_data.export_asdf_meta()
-        inl_ref["inl_table"] = self._make_inl_table()
-        inl_ref["value"] = self.value_array
-
-        return inl_ref
+        return inl_datamodel
 
 
 def simulate_inl_correction_array():
