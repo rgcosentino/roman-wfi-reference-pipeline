@@ -2,8 +2,8 @@ import pytest
 
 from wfi_reference_pipeline.constants import REF_TYPE_DARKDECAYSIGNAL
 from wfi_reference_pipeline.reference_types.dark_decay_signal.dark_decay_signal import (
-    DarkDecaySignal,
     DARK_DECAY_TABLE,
+    DarkDecaySignal,
     get_darkdecay_values,
 )
 from wfi_reference_pipeline.resources.make_test_meta import MakeTestMeta
