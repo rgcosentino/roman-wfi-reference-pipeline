@@ -27,15 +27,6 @@ from datetime import datetime
 
 timestamp = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s %(levelname)s %(message)s",
-    handlers=[
-        logging.StreamHandler(),  # flushes automatically
-        logging.FileHandler(f"/grp/roman/RFP/DEV/scratch/sierra/run_{timestamp}.log", mode="a"),
-    ]
-)
-
 class Mask(ReferenceType):
     """
     Mask() generates a Roman WFI bad pixel mask reference file.
