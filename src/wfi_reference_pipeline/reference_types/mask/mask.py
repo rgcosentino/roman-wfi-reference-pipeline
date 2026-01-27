@@ -22,10 +22,6 @@ from wfi_reference_pipeline.pipelines.dark_pipeline import DarkPipeline
 from wfi_reference_pipeline.reference_types.reference_type import ReferenceType
 from wfi_reference_pipeline.resources.wfi_meta_mask import WFIMetaMask
 
-import os, psutil, time
-from datetime import datetime
-
-timestamp = datetime.now().strftime("%Y-%m-%d_%H.%M.%S")
 
 class Mask(ReferenceType):
     """
