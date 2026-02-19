@@ -11,54 +11,20 @@ from wfi_reference_pipeline.constants import WFI_FRAME_TIME, WFI_MODE_WIM
 from wfi_reference_pipeline.utilities.simulate_reads import simulate_dark_reads
 
 """
-After cloning romanisim, the following needs to be done. 
-
-First compiling on central storage or grp/roman/ requires the following command:
-pip install -e . --no-build-isolation
-
-I have not yet figured out how to properly access the MA Table reference file from CRDS
-within the romanisim command romanisim-make-image --usecrds correctly. 
-
-The work around is to clone romanisim and install it in the current environment 
-also available in this directory. Now edit the parameters.py file located in 
-/romanisim_clone/romanisim/romanisim/parameters.py line numbers around 150-180
-and add a hardcoded diagnostic MA Table that has every read from 1 to 100 as 
-each read as its own resultant. 
-
----> add this below:
-18: [[1], [2], [3], [4], [5], [6], [7], [8], [9], [10],
-    [11], [12], [13], [14], [15], [16], [17], [18], [19], [20],
-    [21], [22], [23], [24], [25], [26], [27], [28], [29], [30],
-    [31], [32], [33], [34], [35], [36], [37], [38], [39], [40],
-    [41], [42], [43], [44], [45], [46], [47], [48], [49], [50],
-    [51], [52], [53], [54], [55], [56], [57], [58], [59], [60],
-    [61], [62], [63], [64], [65], [66], [67], [68], [69], [70],
-    [71], [72], [73], [74], [75], [76], [77], [78], [79], [80],
-    [81], [82], [83], [84], [85], [86], [87], [88], [89], [90],
-    [91], [92], [93], [94], [95], [96], [97], [98], [99], [100]],
-
 Because of memory constraints for an unknown reason right now,
 I am not simulating the realistic short and long darks in the calibration plan
 that have 46 and 98 single read resultants, respectively.
 For this development we instead set short darks to be 16 single read
 resultants while we set the long darks to be 28 single read resultants.
 
-WARNING
-In order to properly compile and get this to run, you must first compile or pip install
-the rfp repo first, then re compiple and pip install the local romanisim version and then
-you are able to run the code. There are some weird collisions in versions I dont understand
-yet with romandatamodels and rad and romancal and romanisim.
-
-
 Example useage:
-
 from wfi_reference_pipeline.utilities.simulate_cal_plan_files.simulate_cal_plan import *
 
 output_dir = "/grp/roman/RFP/DEV/sim_inflight_calplan/romanisim_darks"
 config_file = "simulated_darks_config.yml"
 short = ShortDarkSimulation(output_dir,
                             config_file=config_file,
-                            scas=["WFI01", "WFI07"],
+                            scas=["WFI01", "WFI07"], or scas="ALL_WFI"
                             auto_run=True
                             )
 """
@@ -78,7 +44,7 @@ class BaseDarkSimulation:
         num_exposures,
         scas="ALL_WFI",
         optical_element="F213",
-        ma_table_number=18,
+        ma_table_number=9003,
         level=1,
         config_file=None,
     ):
@@ -192,7 +158,7 @@ class BaseDarkSimulation:
         exp_str = f"{exp:04d}"
         sca_str = f"wfi{sca:02d}"
 
-        return self.output_dir / (f"r{self.program}01001001001004_"
+        return self.output_dir / (f"r{self.program}01001001001001_"
                                   f"{exp_str}_{sca_str}_"
                                   f"{self.optical_element.lower()}_{self.cal_level}.asdf"
                                   )
@@ -204,6 +170,7 @@ class BaseDarkSimulation:
         command = ["romanisim-make-image",
                    "--date", current_time.isot,
                    "--nobj", "0",
+                   "--usecrds", 
                    "--sca", str(sca),
                    "--level", str(self.level),
                    "--ma_table_number", str(self.ma_table_number),
@@ -235,12 +202,13 @@ class BaseDarkSimulation:
                                            )
 
         with asdf.open(filename, mode="rw") as af:
+            #TODO update romanisim to do dark exposures or just realize noise up the ramp
             af.tree["roman"]["meta"]["instrument"]["optical_element"] = "DARK"
-            af.tree["roman"]["meta"]["exposure"]["ma_table_name"] = "DIAGNOSTIC"
+            #TODO make issue or fix MA Table name from reference file in romanisim
+            af.tree["roman"]["meta"]["exposure"]["ma_table_name"] = "IM_DIAGNOSTIC"
 
-            # Keeping some of the noise realizations and original properties of the data form
-            # romanisim but just adding the dark signal to that. 
-            af.tree["roman"]["data"] += dark_cube.astype(np.uint16)
+            # Not using the noise from romanisim yet - need to text RFP simulated dark data first
+            af.tree["roman"]["data"] = dark_cube.astype(np.uint16)
             af.update()
 
     # ---------------------------------------------------------
