@@ -83,4 +83,4 @@ for step in af.tree["steps"]:
         step["parameters"]["skip"] = True
 
 Now we are ready to write out the modified file:
-af.write_to("pars-uncalflatpipeline.asdf")
+af.write_to("pars-exposurepipeline.asdf")
