@@ -11,6 +11,9 @@ class PixelArea(ReferenceType):
     Class PixelArea() inherits the ReferenceType() base class methods
     where static meta data for all reference file types are written. The
     method creates the asdf reference file.
+
+
+
     """
 
     def __init__(
@@ -67,7 +70,7 @@ class PixelArea(ReferenceType):
             self.meta_data.description = "Roman WFI pixel area reference file."
 
         if ref_type_data is None:
-            ref_type_data = make_pam_array
+            ref_type_data = make_pam_array()
         self.pixel_area = ref_type_data    
 
         self.outfile = outfile    
@@ -90,7 +93,9 @@ class PixelArea(ReferenceType):
         """
         pam_ref = rds.PixelareaRef()
         pam_ref["meta"] = self.meta_data.export_asdf_meta()
-        pam_ref["data"] = self.pixel_area
+        pam_ref["data"] = self.pixel_area.astype(np.float32)
+
+        return pam_ref
 
 
 def make_pam_array():

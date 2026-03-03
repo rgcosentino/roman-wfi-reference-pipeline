@@ -37,7 +37,6 @@ from wfi_reference_pipeline.resources.wfi_meta_mask import WFIMetaMask
 from wfi_reference_pipeline.resources.wfi_meta_multiaccumulationtable import (
     WFIMetaMultiAccumulationTable,
 )
-from wfi_reference_pipeline.resources.wfi_meta_pedestal import WFIMetaPedestal
 from wfi_reference_pipeline.resources.wfi_meta_pixel_area import WFIMetaPixelArea
 from wfi_reference_pipeline.resources.wfi_meta_readnoise import WFIMetaReadNoise
 from wfi_reference_pipeline.resources.wfi_meta_referencepixel import (
@@ -127,9 +126,6 @@ class MakeDevMeta:
 
     def _create_dev_meta_matable(self, meta_data):
         self.meta_matable = WFIMetaMultiAccumulationTable(*meta_data)
-
-    def _create_dev_meta_pedestal(self, meta_data):
-        self.meta_pedestal = WFIMetaPedestal(*meta_data)
 
     def _create_dev_meta_pixelarea(self, meta_data):
         p_optical_element = "F158"  # Default optical element 
@@ -239,9 +235,6 @@ class MakeDevMeta:
 
         if ref_type == "MATABLE":
             self._create_dev_meta_matable(meta_data_params)
-
-        if ref_type == "PEDESTAL":
-            self._create_dev_meta_pedestal(meta_data_params)
         
         if ref_type == "PIXELAREA":
             self._create_dev_meta_pixelarea(meta_data_params)
