@@ -138,6 +138,9 @@ class MakeTestMeta:
             ref_optical_element=p_optical_element,
             )
 
+    def _create_test_meta_photom(self, meta_data):
+        self.meta_photom = WFIMetaPhotom(*meta_data)
+
     def _create_test_meta_readnoise(self, meta_data):
         mode = WFI_MODE_WIM
         type = WFI_TYPE_IMAGE
@@ -222,6 +225,9 @@ class MakeTestMeta:
 
         if ref_type == REF_TYPE_PIXELAREA:
             self._create_test_meta_pixelarea(meta_data_params)
+
+        if ref_type == REF_TYPE_PHOTOM:
+            self._create_test_meta_photom(meta_data_params)
 
         if ref_type == REF_TYPE_READNOISE:
             self._create_test_meta_readnoise(meta_data_params)
