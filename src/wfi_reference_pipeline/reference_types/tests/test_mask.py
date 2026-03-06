@@ -110,7 +110,6 @@ class TestMask:
         of valid prepped flats, prepped darks, and unprepped other files.
         """
         nfiles = 15
-        nbadfiles = 5
 
         # Only need to check the paths, not create actual files
         fake_flats = [f"fake_prepped_flat_{i}.asdf" for i in range(nfiles)]
