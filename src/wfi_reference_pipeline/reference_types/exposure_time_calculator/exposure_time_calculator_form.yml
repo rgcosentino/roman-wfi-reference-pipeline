@@ -15,7 +15,7 @@ common:
   nprerej: 0
   nreset: 0
   report_counts: false
-  scatter_on: false
+  scattering_on: false
   qyield_noise_excess_scaling: 1.0
   readnoise_excess_scaling: 1.0
 detectors:
