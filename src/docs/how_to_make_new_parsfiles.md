@@ -59,7 +59,7 @@ Example output:
  'origin': '<SPECIFY>',  # Allowed values are: "STSCI", "STSCI/SOC", "IPAC/SSC"
  'pedigree': '<SPECIFY>',  # Per Technical Report MESA2021-01 allowed values are "DUMMY", "MODEL", "GROUND", or "INFLIGHT"
  'reftype': '<SPECIFY>',
- 'telescope': '<SPECIFY>',
+ 'telescope': 'ROMAN',
  'useafter': '<SPECIFY>'
 }
 ```
