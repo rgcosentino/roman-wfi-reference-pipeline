@@ -3,11 +3,15 @@ from pathlib import Path
 import os
 import asdf
 import numpy as np
-
+from datetime import datetime
+import shutil
 import roman_datamodels as rdm
+
 from romancal.dq_init import DQInitStep
 from romancal.refpix import RefPixStep
 from romancal.saturation import SaturationStep
+
+from astropy.io import fits
 
 from wfi_reference_pipeline.config.config_access import get_pipelines_config
 from wfi_reference_pipeline.constants import REF_TYPE_FGS_MASK
@@ -85,20 +89,21 @@ class FGSMaskPipeline(Pipeline):
 
         # TODO: will file_list also contain the flat rate images? 
         for file in file_list:
+            if "flat" in os.path.basename(file):
+                logging.info(f"Skipping {os.path.basename(file)} since flats are already run through romancal")
+                prep_output_file_path = self.file_handler.format_prep_output_file_path(
+                    os.path.basename(file)
+                )
+                shutil.copy(file, prep_output_file_path)
+                self.prepped_files.append(prep_output_file_path)
+                continue
 
             logging.info("OPENING - " + file.name)
 
             # TODO: only need to prep dark calibration (not flats)
             # The romancal flat file will be called L2. Rick made a PARS file to auto run romancal
 
-            result = self._run_romancal(file)
-
-            prep_output_file_path = self.file_handler.format_prep_output_file_path(
-                result.meta.filename
-            )
-            result.save(path=prep_output_file_path)
-
-            self.prepped_files.append(prep_output_file_path)
+            self._run_romancal(file)
 
         logging.info("Finished PREPPING files to make FGS_MASK reference file from RFP")
 
@@ -126,9 +131,9 @@ class FGSMaskPipeline(Pipeline):
         # Creating the dark pipeline object and creating the superdark
         dark_pipe = DarkPipeline(self.detector)
         dark_pipe.prep_superdark_file(
-            full_file_list=self.dark_filelist,
+            short_file_list=self.dark_filelist,
             outfile=self.superdark_path,
-            full_file_num_reads=nreads,
+            short_dark_num_reads=nreads,
         )
 
         # Loading the superdark and setting as attr
@@ -138,9 +143,9 @@ class FGSMaskPipeline(Pipeline):
     
     def prep_super_rate(self):
         """The prepped flats will already be rate images. Create a super rate image."""
-        rate_images = np.zeros((len(self.flat_filelist, DETECTOR_PIXEL_Y_COUNT, DETECTOR_PIXEL_X_COUNT)))
+        rate_images = np.zeros((len(self.flat_filelist), DETECTOR_PIXEL_Y_COUNT, DETECTOR_PIXEL_X_COUNT))
 
-        for i, file in (self.flat_filelist):
+        for i, file in enumerate(self.flat_filelist):
             with asdf.open(file, memmap=True) as af:
                 
                 data = af["roman"]["data"]
@@ -164,42 +169,69 @@ class FGSMaskPipeline(Pipeline):
         tmp = MakeDevMeta(
             ref_type=self.ref_type
         )  # TODO replace with MakeMeta which gets actual information from files
-        # fgs_mask_dev_meta = tmp.meta_fgs_mask.export_asdf_meta()
+
         out_file_path = self.file_handler.format_pipeline_output_file_path(
             tmp.meta_fgs_mask.mode,
             tmp.meta_fgs_mask.instrument_detector,
         )
 
-        rfp_fgs_mask = FGSMask(
+        self.rfp_fgs_mask = FGSMask(
             meta_data=tmp.meta_fgs_mask,
             superdark=self.superdark,
-            normalized_super_rate=self.normalized_super_rate,
+            super_rate_image=self.super_rate_image,
             outfile=out_file_path,
             clobber=True,
         )
 
-        rfp_fgs_mask.make_fgs_mask_image()
-        rfp_fgs_mask.generate_outfile()
+        self.rfp_fgs_mask.make_fgs_mask_image()
+
+        self.rfp_fgs_mask.generate_outfile()
         logging.info("Finished RFP to make FGS_MASK")
 
-    def pre_deliver(self):
+    def pre_deliver(self, file_change_note=None):
         """This is where the coord transformation + boolean impl goes"""
-        self._change_coord_to_det()
-        self._change_to_boolean()
+        self.convert_mask_to_pss_format()
+        self.save_pss_mask(file_change_note=file_change_note)
 
-        # PSS expects the mask as FITS boolean file in DETECTOR coordinates (not SCIENCE)
-        logging.info("Transforming mask to boolean mask in DETECTOR coordinates")
-        binary_mask = (mask != 0).astype("uint8")
-        binary_mask_det = change_coord_to_det(binary_mask, det)
-
-        logging.info("Writing transformed boolean mask to FITS")
-        binary_mask_path = os.path.join(basedir, f"binary_mask_{det}.fits")
-        fits.writeto(binary_mask_path, data=binary_mask_det, overwrite=True)
-        mask_path = os.path.join(basedir, f"mask_{det}.fits")
-        fits.writeto(mask_path, data=mask, overwrite=True)
-        return 
+    def deliver(self):
+        pass
     
-    def _change_coord_to_det(self):
+    def convert_mask_to_pss_format(self):
+
+        mask_det_coords = self._change_coord_to_det(self.rfp_fgs_mask.mask_image)
+        self.mask_pss = self._convert_mask_to_boolean(mask_det_coords)
+
+    # TODO: Is it the standard for the default value to be explicitly set in 
+    # subsequent functions? or just the first time it's used? (file_change_note)
+    def save_pss_mask(self, file_change_note):
+
+        mask_header = self._make_fits_header(file_change_note=file_change_note)
+        hdu = fits.PrimaryHDU(data=self.mask_pss,
+                              header=mask_header)
+        
+        self.pss_mask_outpath = os.path.join(self.file_handler.pipeline_out_path,
+                                             f"fgs_mask_{self.detector}.fits")
+    
+        hdu.writeto(self.pss_mask_outpath,
+                    overwrite=True)
+
+    def _make_fits_header(self, file_change_note):
+
+        hdr = fits.Header()
+
+        hdr['DETECTOR'] = (self.detector, 'WFI detector number')
+        hdr['AUTHOR']   = (self.rfp_fgs_mask.meta_data.author, 'Author of file')
+        hdr['DATETIME'] = (datetime.now().strftime('%Y-%m-%d'), 'Date of file creation')
+        hdr['NBADPIX']  = (int(np.count_nonzeros(self.mask_pss)), 'Number of bad pixels')
+        hdr['CHANGE_NOTE'] = (file_change_note, 'High-level changes to mask derivation')
+
+        return hdr
+        
+
+    def _convert_mask_to_boolean(self, mask):
+        return (mask != 0).astype("uint8")
+
+    def _change_coord_to_det(self, arr):
         """
         Change the detector coordinates from DETECTOR to SCIENCE (run again to undo). Dependent on detector.
         Code from Sarah Betti
@@ -246,14 +278,21 @@ class FGSMaskPipeline(Pipeline):
     
     def _run_romancal(self, file):
         """
-        Run romancal on a single file. Created so multiprocessing's Pool can be implemented.
+        Run romancal on a single file.
         """
         with rdm.open(file) as f:
+
             result = DQInitStep.call(f, save_results=False)
             result = SaturationStep.call(result, save_results=False)
             result = RefPixStep.call(result, save_results=False)
 
-        return result
+            prep_output_file_path = self.file_handler.format_prep_output_file_path(
+                result.meta.filename
+            )
+            result.save(path=prep_output_file_path)
+
+            self.prepped_files.append(prep_output_file_path)
+
     
     def _sort_filelist(self):
         """
@@ -284,7 +323,7 @@ class FGSMaskPipeline(Pipeline):
         if not self.dark_filelist:
             raise TypeError("No prepped dark files found in self.dark_filelist. Cannot make superdark.")
         
-        with asdf.open(self.dark_filelist[0], memmap=True) as dm:
+        with asdf.open(self.dark_filelist[0], memmap=True) as af:
             data = af["roman"]["data"]
             dark = data.value if hasattr(data, "value") else data
             nreads = dark.shape[0]

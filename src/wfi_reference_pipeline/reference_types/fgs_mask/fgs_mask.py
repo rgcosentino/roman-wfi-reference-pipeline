@@ -16,6 +16,8 @@ from wfi_reference_pipeline.reference_types.readnoise.readnoise import ReadNoise
 from wfi_reference_pipeline.reference_types.flat.flat import Flat
 from wfi_reference_pipeline.resources.wfi_meta_fgs_mask import WFIMetaFGSMask
 
+from wfi_reference_pipeline.constants import WFI_TYPE_IMAGE
+
 from ..reference_type import ReferenceType
 
 
@@ -91,6 +93,7 @@ class FGSMask(ReferenceType):
             meta_data=meta_data,
             outfile=outfile,
             clobber=clobber,
+            file_list=[""],
         )
 
         self.superdark = superdark
@@ -192,7 +195,7 @@ class FGSMask(ReferenceType):
     def create_cds_noise_darkrate_im(self, do_sigma_clip=True, sig_clip_cds_low=5.0, sig_clip_cds_high=5.0):
         logging.info("Creating ReadNoise data cube")
         self.readnoise_cube = ReadNoise.ReadNoiseDataCube(self.superdark,
-                                                          self.meta_data.type)
+                                                          WFI_TYPE_IMAGE)
         # Prep CDS noise computations
         self.readnoise_cube.fit_cube(degree=1)
         self.readnoise_cube.make_ramp_model(order=1)
@@ -273,4 +276,4 @@ class FGSMask(ReferenceType):
             'dq': self.mask_image
         }
 
-        return asdf.AsdfFile(datamodel_tree)
+        return datamodel_tree

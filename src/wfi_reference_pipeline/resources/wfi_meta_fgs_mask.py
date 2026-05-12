@@ -16,6 +16,7 @@ class WFIMetaFGSMask(WFIMetadata):
     def __post_init__(self):
         super().__post_init__()
         self.reference_type = constants.REF_TYPE_FGS_MASK
+        self.mode = constants.WFI_MODE_WIM
 
     def export_asdf_meta(self):
         asdf_meta = {
