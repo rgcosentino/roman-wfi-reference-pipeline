@@ -12,7 +12,7 @@ from wfi_reference_pipeline.constants import (
     REF_TYPE_GAIN,
     REF_TYPE_INTEGRALNONLINEARITY,
     REF_TYPE_INVERSELINEARITY,
-    REF_TYPE_IPC,
+    REF_TYPE_INTERPIXELCAPACITANCE,
     REF_TYPE_LINEARITY,
     REF_TYPE_MASK,
     REF_TYPE_MULTIACCUMULATIONTABLE,
@@ -267,8 +267,8 @@ class MakeDevMeta:
         if ref_type == REF_TYPE_INVERSELINEARITY:
             self._create_dev_meta_inverselinearity(meta_data_params)
 
-        if ref_type == REF_TYPE_IPC:
-            self._create_dev_meta_ipc(meta_data_params)
+        if ref_type == REF_TYPE_INTERPIXELCAPACITANCE:
+            self._create_dev_meta_inter_pixel_capacitance(meta_data_params)
 
         if ref_type == REF_TYPE_LINEARITY:
             self._create_dev_meta_linearity(meta_data_params)

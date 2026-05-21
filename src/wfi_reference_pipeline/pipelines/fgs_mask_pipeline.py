@@ -8,9 +8,13 @@ import asdf
 import numpy as np
 import roman_datamodels as rdm
 from astropy.io import fits
+from romancal.dark_decay import DarkDecayStep
 from romancal.dq_init import DQInitStep
+from romancal.linearity import LinearityStep
+from romancal.ramp_fitting import ramp_fit_step
 from romancal.refpix import RefPixStep
 from romancal.saturation import SaturationStep
+from romancal.wfi18_transient import WFI18TransientStep
 
 from wfi_reference_pipeline.config.config_access import get_pipelines_config
 from wfi_reference_pipeline.constants import (
@@ -89,23 +93,16 @@ class FGSMaskPipeline(Pipeline):
         else:
             file_list = list(map(Path, self.uncal_files))
 
-        # TODO: will file_list also contain the flat rate images? 
         for file in file_list:
-            if "flat" in os.path.basename(file):
-                logging.info(f"Skipping {os.path.basename(file)} since flats are already run through romancal")
-                prep_output_file_path = self.file_handler.format_prep_output_file_path(
-                    os.path.basename(file)
-                )
-                shutil.copy(file, prep_output_file_path)
-                self.prepped_files.append(prep_output_file_path)
-                continue
 
             logging.info("OPENING - " + file.name)
 
-            # TODO: only need to prep dark calibration (not flats)
-            # The romancal flat file will be called L2. Rick made a PARS file to auto run romancal
+            perform_rampfit = False
 
-            self._run_romancal(file)
+            if "flat" in os.path.basename(file):
+                perform_rampfit = True
+
+            self._run_romancal(file, perform_rampfit=perform_rampfit)
 
         logging.info("Finished PREPPING files to make FGS_MASK reference file from RFP")
 
@@ -330,15 +327,28 @@ class FGSMaskPipeline(Pipeline):
 
         return
     
-    def _run_romancal(self, file):
+    def _run_romancal(self, file, perform_rampfit=False):
         """
         Run romancal on a single file. Add the output filepath to `self.prepped_files`.
+
+        Parameters:
+        -----------
+        file : str
+            The L1 file to be run through romancal.
+        perform_rampfit : bool, default=False
+            If True, run all steps of romancal up to the ramp fitting step.
         """
         with rdm.open(file) as f:
 
             result = DQInitStep.call(f, save_results=False)
             result = SaturationStep.call(result, save_results=False)
             result = RefPixStep.call(result, save_results=False)
+
+            if perform_rampfit:
+                result = DarkDecayStep.call(result, save_results=False)
+                result = WFI18TransientStep.call(result, save_results=False)
+                result = LinearityStep.call(result, save_results=False)
+                result = ramp_fit_step.RampFitStep.call(result, save_results=False)
 
             prep_output_file_path = self.file_handler.format_prep_output_file_path(
                 result.meta.filename
