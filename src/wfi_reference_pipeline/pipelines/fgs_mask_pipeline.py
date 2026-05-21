@@ -29,7 +29,7 @@ from wfi_reference_pipeline.resources.make_dev_meta import MakeDevMeta
 class FGSMaskPipeline(Pipeline):
     """
     Derived from Pipeline Base Class
-    This is the entry point for all FGS Mask Pipeline functionality
+    This is the entry point for all Fine Guiding System (FGS) Mask Pipeline functionality.
 
     Gives user access to:
     select_uncal_files : Selecting level 1 uncalibrated asdf files with input generated from config
@@ -193,7 +193,14 @@ class FGSMaskPipeline(Pipeline):
         )
 
         # Running the actual FGS mask algorithms
-        self.rfp_fgs_mask.make_fgs_mask_image()
+        self.rfp_fgs_mask.make_fgs_mask_image(
+            dead_sigma_thr=self.config["DEAD_SIGMA_THR"],
+            hot_thr=self.config["HOT_THR"],
+            superhot_thr=self.config["SUPERHOT_THR"],
+            high_cds_thr=self.config["HIGH_CDS_THR"],
+            low_qe_thr=self.config["LOW_QE_THR"],
+            bad_flat_thr=self.config["BAD_FLAT_THR"]
+        )
 
         self.rfp_fgs_mask.generate_outfile()
 
@@ -201,8 +208,10 @@ class FGSMaskPipeline(Pipeline):
 
     def pre_deliver(self, file_change_note=None):
         """
-        Converting the new bitmask to DETECTOR coordinates and
-        creating a boolean mask where all non-zero values = 1.
+        The final FGS BPM that is deliverd to PSS and then sent to the MOC is in a different
+        format than the science bad pixel mask on CRDS (see docstring of `convert_mask_to_pss_format`).
+        This function converts the new bitmask to the file format used by the Roman Planning and Scheduling Subsystem (PSS).
+
         NOTE: This is the format that will be delivered to PSS.
 
         Parameters
@@ -215,12 +224,20 @@ class FGSMaskPipeline(Pipeline):
         self.save_pss_mask(file_change_note=file_change_note)
 
     def deliver(self):
+        """
+        FGS masks are *not* delivered to CRDS; they follow a different (manual) delivery process using central store.
+        """
         pass
     
     def convert_mask_to_pss_format(self):
         """
-        Put the DQ mask into detector coordinates, then convert to boolean.
-        The converted PSS mask is set as `self.mask_pss`.
+        The final FGS BPM that is deliverd to PSS and then sent to the MOC is in a different
+        format than the science bad pixel mask on CRDS. It is in detector coordinates
+        (rather than the SOC's science coordinates), and it is a boolean mask (instead
+        of np.uint32 bitvalues).
+        
+        This function puts the DQ mask into detector coordinates, then converts it to boolean.
+        The converted PSS mask is then set as `self.mask_pss`.
         """
         mask_det_coords = self._change_coord_to_det(self.rfp_fgs_mask.mask_image)
         self.mask_pss = self._convert_mask_to_boolean(mask_det_coords)
@@ -246,6 +263,12 @@ class FGSMaskPipeline(Pipeline):
     def _make_fits_header(self, file_change_note):
         """
         Create the FITS header for the PSS mask.
+        Example of header values:
+            hdr['DETECTOR'] = "WFI01"
+            hdr['AUTHOR'] = "Nancy Grace Roman"
+            hdr['DATETIME'] = 2026-05-01 # datetime in str format
+            hdr['NBADPIX'] = 20000
+            hdr['CHANGE_NOTE'] = "First mask using new dead pixel identification algorithm"
         """
         hdr = fits.Header()
 
