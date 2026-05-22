@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 from pathlib import Path
 
 import roman_datamodels as rdm
@@ -312,7 +311,6 @@ class DarkPipeline(Pipeline):
             outfile=out_file_path,
             clobber=True,
         )
-        read_pattern = [[1], [2, 3], [5, 6, 7], [10]]
         rfp_dark.make_rate_image_from_data_cube()
         rfp_dark.update_data_quality_array(
             hot_pixel_rate=self.qc.pipeline.values.hot_pixel_rate,
