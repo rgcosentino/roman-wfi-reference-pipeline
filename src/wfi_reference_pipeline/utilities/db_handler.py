@@ -115,6 +115,7 @@ class DBHandler:
     def new_pipeline_db_entry(self, ref_type, wfi_mode, reef_monitor):
         """
         Initialize and insert a new logistics processing table row for this pipeline.
+        Currently only working with rfp_log_pro but add db_entry as parmeter if/when we need to expand
 
         Parameters
         ----------
@@ -130,5 +131,10 @@ class DBHandler:
         add_to_tables_from_class_list(self.db_engine, [self.db_entry.rfp_log_pro])
 
     def update_db_entry(self):
+        """
+        update the current database entry for this pipeline run.
+        Currently only working with rfp_log_pro but add db_entry as parmeter if/when we need to expand
+        """
+
         # Note: Currently not wrapping in a Try.  If database issues exist, please crash loudly
-        merge_db_entry(self.db_engine, self.db_entry)
+        merge_db_entry(self.db_engine, self.db_entry.rfp_log_pro)
