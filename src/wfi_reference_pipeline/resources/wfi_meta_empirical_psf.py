@@ -8,7 +8,7 @@ from wfi_reference_pipeline.resources.wfi_metadata import WFIMetadata
 @dataclass
 class WFIMetaEPSF(WFIMetadata):
 
-    ref_optical_element: InitVar[Optional[List[str]]] = None
+    ref_optical_element: InitVar[Optional[str]] = None
 
     # --- EPSF-specific fields ---
     oversample: int = 4
@@ -25,7 +25,7 @@ class WFIMetaEPSF(WFIMetadata):
         super().__post_init__()
 
         self.reference_type = constants.REF_TYPE_EPSF
-        self.optical_element = []
+        self.optical_element = ref_optical_element
 
         # Normalize
         self.spectral_type = list(self.spectral_type)

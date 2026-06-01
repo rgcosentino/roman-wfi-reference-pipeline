@@ -81,7 +81,7 @@ class MakeDevMeta:
         self.meta_detector_status = WFIMetaDetectorStatus(*meta_data)
   
     def _create_dev_meta_epsf(self, meta_data):
-        ref_optical_element = ["F062"]
+        ref_optical_element = "F062"
 
         oversample = 4
         spectral_type = ["A0V", "G2V", "M5V"]
