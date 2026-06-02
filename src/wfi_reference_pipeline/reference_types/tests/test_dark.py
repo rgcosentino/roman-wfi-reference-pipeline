@@ -1,8 +1,7 @@
 import os
-
 import numpy as np
 import pytest
-from romancal.lib import dqflags
+from roman_datamodels import dqflags
 
 from wfi_reference_pipeline.constants import (
     DETECTOR_PIXEL_X_COUNT,
