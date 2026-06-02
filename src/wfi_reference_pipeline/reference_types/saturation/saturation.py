@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-import roman_datamodels.stnode as rds
+from roman_datamodels.datamodels import SaturationRefModel
 from astropy import units as u
 
 from wfi_reference_pipeline.constants import (
@@ -152,7 +152,7 @@ class Saturation(ReferenceType):
         """
 
         # Construct the saturation object from the data model.
-        saturation_datamodel_tree = rds.SaturationRef()
+        saturation_datamodel_tree = SaturationRefModel()
         saturation_datamodel_tree["meta"] = self.meta_data.export_asdf_meta()
         saturation_datamodel_tree["data"] = self.saturation_image
         saturation_datamodel_tree["dq"] = self.dq_mask

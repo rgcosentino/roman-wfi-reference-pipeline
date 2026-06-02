@@ -1,5 +1,4 @@
 import os
-
 import asdf
 import numpy as np
 import pytest
@@ -9,6 +8,9 @@ from wfi_reference_pipeline.constants import (
     DETECTOR_PIXEL_Y_COUNT,
 )
 from wfi_reference_pipeline.reference_types.dark.dark import Dark
+from wfi_reference_pipeline.reference_types.dark_decay_signal.dark_decay_signal import (
+    DarkDecaySignal
+)
 from wfi_reference_pipeline.reference_types.flat.flat import Flat
 from wfi_reference_pipeline.reference_types.gain.gain import Gain
 from wfi_reference_pipeline.reference_types.inter_pixel_capacitance.inter_pixel_capacitance import (
@@ -60,6 +62,31 @@ class TestSchema():
         # If none, then datamodel tree is valid.
         assert tf.validate() is None
 
+    def test_rfp_dark_decay_schema(self):
+        """
+        Use the WFI reference file pipeline DarkDecaySignal() module
+        to build a testable object which is then validated against
+        the DMS reference file schema.
+        """
+
+        # Make test meta
+        tmp = MakeTestMeta(ref_type='DARKDECAYSIGNAL')
+
+        # Make RFP DarkDecaySignal reference file object for testing
+        rfp_dark_decay = DarkDecaySignal(
+            meta_data=tmp.meta_dark_decay_signal
+        )
+
+        # Make test asdf tree
+        tf = asdf.AsdfFile()
+        tf.tree = {
+            'roman': rfp_dark_decay.populate_datamodel_tree()
+        }
+
+        # Validate method returns list of exceptions the json schema file failed to match.
+        # If none, then datamodel tree is valid.
+        assert tf.validate() is None
+
     def test_rfp_flat_schema(self):
         """
         Use the WFI reference file pipeline Flat() module to build a testable object
@@ -105,7 +132,6 @@ class TestSchema():
         # If none, then datamodel tree is valid.
         assert tf.validate() is None
 
-    @pytest.mark.skip(reason="Temporarily disabled test")
     def test_rfp_interpixelcapacitance_schema(self):
         """
         Use the WFI reference file pipeline IPC() module to build a testable object
@@ -118,7 +144,6 @@ class TestSchema():
 
         # Make RFP IPC reference file object for testing.
         rfp_ipc = InterPixelCapacitance(meta_data=tmp.meta_ipc,
-                                        file_list=None,
                                         ref_type_data=test_data)
 
         # Make test asdf tree
@@ -128,7 +153,6 @@ class TestSchema():
         # If none, then datamodel tree is valid.
         assert tf.validate() is None
 
-    @pytest.mark.skip(reason="Temporarily disabled test")
     def test_rfp_inverselinearity_schema(self):
         """
         Use the WFI reference file pipeline InverseLinearity() module to build
@@ -141,7 +165,7 @@ class TestSchema():
                             dtype=np.float32)  # Dimensions of inverse coefficients are 11x4096x4096.
 
         rfp_inverselinearity = InverseLinearity(meta_data=tmp.meta_inverselinearity,
-                                                input_coefficients=test_data)
+                                                ref_type_data=test_data)
 
         # Make test asdf tree
         tf = asdf.AsdfFile()
@@ -219,8 +243,6 @@ class TestSchema():
         # If none, then datamodel tree is valid.
         assert tf.validate() is None
 
-    # @pytest.mark.skip(reason="Temporarily disabled test")
-    @skip_on_github
     def test_rfp_referencepixel_schema(self):
         """
         Use the WFI reference file pipeline ReferencePixel() module to build

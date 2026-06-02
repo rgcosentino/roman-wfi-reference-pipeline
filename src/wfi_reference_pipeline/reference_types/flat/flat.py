@@ -1,8 +1,7 @@
 import logging
-
 import asdf
 import numpy as np
-import roman_datamodels.stnode as rds
+from roman_datamodels.datamodels import FlatRefModel
 from astropy import units as u
 
 from wfi_reference_pipeline.constants import (
@@ -361,7 +360,7 @@ class Flat(ReferenceType):
         """
 
         # Construct the flat field object from the data model.
-        flat_datamodel_tree = rds.FlatRef()
+        flat_datamodel_tree = FlatRefModel()
         flat_datamodel_tree['meta'] = self.meta_data.export_asdf_meta()
         flat_datamodel_tree['data'] = self.flat_image.astype(np.float32)
         flat_datamodel_tree['err'] = self.flat_error.astype(np.float32)

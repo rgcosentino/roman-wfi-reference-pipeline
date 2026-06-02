@@ -4,7 +4,7 @@ import os
 
 import asdf
 import numpy as np
-import roman_datamodels.stnode as rds
+from roman_datamodels.datamodels import ReadnoiseRefModel
 from astropy import units as u
 from astropy.stats import sigma_clip
 
@@ -339,7 +339,7 @@ class ReadNoise(ReferenceType):
         """
 
         # Construct the read noise object from the data model.
-        readnoise_datamodel_tree = rds.ReadnoiseRef()
+        readnoise_datamodel_tree = ReadnoiseRefModel()
         readnoise_datamodel_tree["meta"] = self.meta_data.export_asdf_meta()
         readnoise_datamodel_tree["data"] = self.readnoise_image.astype(np.float32)
 

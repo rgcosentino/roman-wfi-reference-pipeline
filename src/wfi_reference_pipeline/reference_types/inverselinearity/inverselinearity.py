@@ -1,7 +1,7 @@
 import logging
 
 import numpy as np
-import roman_datamodels.stnode as rds
+from roman_datamodels.datamodels import InverselinearityRefModel
 from astropy import units as u
 from astropy.io import fits
 
@@ -21,6 +21,10 @@ class InverseLinearity(ReferenceType):
     make these reference files with intended use by romanisim only. There
     is not currently any plan to produce these reference files for use
     in romancal standard processing.
+
+    See Brandt, T. 2025 "A Classic Nonlinearity Correction Algorithm for 
+    Detectors Read Out Up-the-ramp", PASP 137 125005.
+    DOI 10.1088/1538-3873/ae2713
     """
 
     def __init__(
@@ -194,7 +198,7 @@ class InverseLinearity(ReferenceType):
         """
 
         # Construct the dark object from the data model.
-        inverselinearity_datamodel_tree = rds.InverselinearityRef()
+        inverselinearity_datamodel_tree = InverselinearityRefModel()
         inverselinearity_datamodel_tree['meta'] = self.meta_data.export_asdf_meta()
         inverselinearity_datamodel_tree['coeffs'] = self.inverselinearity_coefficients
         inverselinearity_datamodel_tree['dq'] = self.dq_mask
