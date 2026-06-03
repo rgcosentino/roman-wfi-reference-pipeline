@@ -7,11 +7,9 @@ from wfi_reference_pipeline.constants import (
     REF_TYPE_PIXELAREA,
     REF_TYPE_READNOISE,
 )
-
 from wfi_reference_pipeline.reference_types.pixel_area.pixel_area import (
     PixelArea,
 )
-
 from wfi_reference_pipeline.resources.make_test_meta import (
     MakeTestMeta,
 )
