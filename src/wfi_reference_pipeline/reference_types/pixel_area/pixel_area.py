@@ -108,13 +108,21 @@ class PixelArea(ReferenceType):
         self.nominal_pixel_area = None
 
         if ref_type_data is not None:
-            self.pixel_area = ref_type_data
+
+            if not isinstance(ref_type_data, np.ndarray):
+                raise TypeError(
+                    f"ref_type_data must be a numpy.ndarray, "
+                    f"received {type(ref_type_data)}"
+                )
+
+            self.pixel_area = ref_type_data.astype(np.float32)
+
         else:
             self.pixel_area = self.make_pixel_area_image()
 
-        logging.debug(
-            f"Initialized PixelArea reference file: {outfile}"
-        )
+            logging.debug(
+                f"Initialized PixelArea reference file: {outfile}"
+            )
 
     def calculate_error(self):
         """
