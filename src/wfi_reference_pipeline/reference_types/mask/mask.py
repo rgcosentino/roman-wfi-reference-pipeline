@@ -7,9 +7,9 @@ import asdf
 import numpy as np
 import pandas as pd
 import roman_datamodels as rdm
-import roman_datamodels.stnode as rds
 from astropy.convolution import Box2DKernel, convolve
 from astropy.io import fits
+from roman_datamodels.datamodels import MaskRefModel
 from roman_datamodels.dqflags import pixel as dqflags
 from scipy.optimize import curve_fit
 from scipy.stats import anderson, kurtosis, linregress, skew
@@ -1441,7 +1441,7 @@ class Mask(ReferenceType):
         """
 
         # Construct the mask object from the data model.
-        mask_datamodel_tree = rds.MaskRef()
+        mask_datamodel_tree = MaskRefModel()
         mask_datamodel_tree['meta'] = self.meta_data.export_asdf_meta()
         mask_datamodel_tree['dq'] = self.mask_image
 

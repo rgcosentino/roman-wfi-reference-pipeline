@@ -6,8 +6,8 @@ from pathlib import Path
 
 import numpy as np
 import roman_datamodels as rdm
-import roman_datamodels.stnode as rds
 from astropy import units as u
+from roman_datamodels.datamodels import RefpixRefModel
 
 from wfi_reference_pipeline.resources.wfi_meta_referencepixel import (
     WFIMetaReferencePixel,
@@ -296,7 +296,7 @@ class ReferencePixel(ReferenceType):
         """
 
         # Construct the refpix object from the data model.
-        referencepixel_datamodel_tree = rds.RefpixRef()
+        referencepixel_datamodel_tree = RefpixRefModel()
         referencepixel_datamodel_tree['meta'] = self.meta_data.export_asdf_meta()
         referencepixel_datamodel_tree['gamma'] = self.gamma
         referencepixel_datamodel_tree['zeta'] = self.zeta
