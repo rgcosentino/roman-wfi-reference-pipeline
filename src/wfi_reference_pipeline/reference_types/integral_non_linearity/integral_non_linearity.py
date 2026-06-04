@@ -1,5 +1,5 @@
 import numpy as np
-import roman_datamodels.stnode as rds
+from roman_datamodels.datamodels import IntegralnonlinearityRefModel
 
 from wfi_reference_pipeline.resources.wfi_meta_integral_non_linearity import (
     WFIMetaIntegralNonLinearity,
@@ -33,6 +33,8 @@ class IntegralNonLinearity(ReferenceType):
     coordinate reference system has already taken place when the input data is passed into the class as ref_type_data.
     
     See https://roman-docs.stsci.edu/data-handbook/wfi-data-levels-and-products/coordinate-systems
+
+    See Brandt, Timothy D., et al. 2025, Integral Nonlinearity in Roman-WFI Detector Data, Technical Report Roman-STScI-000866 (Baltimore: STScI)
     """
 
     def __init__(
@@ -180,7 +182,7 @@ class IntegralNonLinearity(ReferenceType):
         """
         Build the Roman datamodel tree for the integral non-linearity reference.
         """
-        inl_datamodel = rds.IntegralnonlinearityRef()
+        inl_datamodel = IntegralnonlinearityRefModel()
         inl_datamodel["meta"] = self.meta_data.export_asdf_meta()
         inl_datamodel["inl_table"] = self._make_inl_table()
         inl_datamodel["value"] = self.value_array

@@ -5,9 +5,9 @@ from collections.abc import Iterable
 import asdf
 import astropy.units as u
 import numpy as np
-import roman_datamodels.stnode as rds
 from astropy.stats import sigma_clipped_stats
-from romancal.lib import dqflags
+from roman_datamodels import dqflags
+from roman_datamodels.datamodels import LinearityRefModel
 
 from wfi_reference_pipeline.constants import (
     WFI_FRAME_TIME,
@@ -43,6 +43,10 @@ class Linearity(ReferenceType):
     Class Linearity() inherits the ReferenceType() base class methods
     where static meta data for all reference file types are written. The
     method make_linearity() creates the asdf linearity file.
+
+    See Brandt, T. 2025 "A Classic Nonlinearity Correction Algorithm for 
+    Detectors Read Out Up-the-ramp", PASP 137 125005.
+    DOI 10.1088/1538-3873/ae2713
     """
 
     def __init__(self, linearity_image, meta_data, optical_element=None,
@@ -175,7 +179,7 @@ class Linearity(ReferenceType):
         """
 
         # Construct the linearity object from the data model.
-        linearity_datamodel_tree = rds.LinearityRef()
+        linearity_datamodel_tree = LinearityRefModel()
         linearity_datamodel_tree['meta'] = self.meta
         if self.fit_complete:
             nonlinear_pixels = ((self.dq_mask == float('NaN')) |
@@ -203,7 +207,7 @@ class Linearity(ReferenceType):
         self.clobber = clobber
         # Check if the output file exists, and take appropriate action.
         self.check_output_file(self.outfile)
-        af = asdf.AsdfFile()
+        af = LinearityRefModel()
         if datamodel_tree:
             af.tree = {'roman': datamodel_tree}
         else:
@@ -477,7 +481,7 @@ def _save_linearity(outfile, meta, coeffs, mask, clobber=False, unc=None):
     clobber: bool; If True, it allows overwritting a previous linearity file.
     unc: numpy.ndarray; Uncertainty of the coefficients, coeffs.
     """
-    linearityfile = rds.LinearityRef()
+    linearityfile = LinearityRefModel()
     linearityfile['meta'] = meta
     linearityfile['coeffs'] = coeffs
     nonlinear_pixels = (mask == float('NaN')) | (coeffs[0, :, :] == float('NaN'))

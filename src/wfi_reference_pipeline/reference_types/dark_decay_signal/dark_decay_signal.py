@@ -1,6 +1,6 @@
 import logging
 
-import roman_datamodels.stnode as rds
+from roman_datamodels.datamodels import DarkdecaysignalRefModel
 
 from wfi_reference_pipeline.resources.wfi_meta_dark_decay_signal import (
     WFIMetaDarkDecaySignal,
@@ -16,8 +16,8 @@ class DarkDecaySignal(ReferenceType):
     Creates a Roman WFI Dark Decay Signal reference file that stores
     amplitude and time constant for all detectors
 
-    No array maps are created — this is a detector-level table from T. Brandt et al 2025.
-
+    No array maps are created — this is a detector-level table from Betti et al. 2025
+    
     Example code to generate file:
     from wfi_reference_pipeline.reference_types.dark_decay_signal.dark_decay_signal import DarkDecaySignal
     from wfi_reference_pipeline.resources.make_dev_meta import MakeDevMeta
@@ -27,9 +27,13 @@ class DarkDecaySignal(ReferenceType):
     tmp.meta_dark_decay_signal.instrument_detector = 'WFI01'
     tmp.meta_dark_decay_signal.use_after = '2023-08-01T00:00:00.000'
     tmp.meta_dark_decay_signal.author = 'Rick Cosentino'
-    tmp.meta_dark_decay_signal.description = 'New calibration reference file that has properties of amplitude and time constant for each WFI detector for an exponential decay dark signal to be removed with romancal.'
+    tmp.meta_dark_decay_signal.description = 'New calibration reference file that has properties of amplitude 
+    and time constant for each WFI detector for an exponential decay dark signal to be removed with romancal.'
     rfp_dark_decay = DarkDecaySignal(meta_data=tmp.meta_dark_decay_signal)
     rfp_dark_decay.generate_outfile()
+
+    See Betti, Sarah, et al. 2025, The Statistical Properties of Dark Ramps for the Roman-WFI Detectors, 
+    Technical Report Roman-STScI-000814 (Baltimore: STScI)
     """
 
     def __init__(self,
@@ -75,7 +79,7 @@ class DarkDecaySignal(ReferenceType):
         """
         Create the datamodel tree to be written to ASDF.
         """
-        darkdecay_datamodel_tree = rds.DarkdecaysignalRef()
+        darkdecay_datamodel_tree = DarkdecaysignalRefModel()
         darkdecay_datamodel_tree["meta"] = self.meta_data.export_asdf_meta()
         darkdecay_datamodel_tree["decay_table"] = DARK_DECAY_TABLE
 

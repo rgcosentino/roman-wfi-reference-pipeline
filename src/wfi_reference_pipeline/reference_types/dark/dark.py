@@ -2,8 +2,8 @@ import logging
 
 import asdf
 import numpy as np
-import roman_datamodels.stnode as rds
 from astropy import units as u
+from roman_datamodels.datamodels import DarkRefModel
 
 from wfi_reference_pipeline.constants import (
     DETECTOR_PIXEL_X_COUNT,
@@ -254,7 +254,7 @@ class Dark(ReferenceType):
         """
 
         # Construct the dark object from the data model.
-        dark_datamodel_tree = rds.DarkRef()
+        dark_datamodel_tree = DarkRefModel()
         dark_datamodel_tree["meta"] = self.meta_data.export_asdf_meta()
         dark_datamodel_tree["dark_slope"] = self.dark_rate_image.astype(np.float32)
         dark_datamodel_tree["dark_slope_error"] = self.dark_rate_image_error.astype(np.float32)
