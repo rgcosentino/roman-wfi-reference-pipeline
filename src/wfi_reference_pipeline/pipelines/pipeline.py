@@ -62,6 +62,7 @@ class Pipeline(ABC):
             self.db_handler = DBHandler(self.ref_type, self._db_config.get("use_dsn"), sql_server_str=self._db_config.get("sql_server_str"), sql_database_str=self._db_config.get("sql_database_str"), port=self._db_config.get("port"), dsn_header_str=self._db_config.get("dsn_header_str"))
         else:
             self.db_handler = None
+        self.qc = None # will be established during init_quality_control
 
     @abstractmethod
     def select_uncal_files(self):
