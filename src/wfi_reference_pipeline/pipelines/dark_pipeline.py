@@ -109,7 +109,7 @@ class DarkPipeline(Pipeline):
             file_list = list(map(Path, file_list))
             self.uncal_files = file_list
         else:
-            file_list = self.uncal_files
+            file_list = list(map(Path, self.uncal_files))
 
         for file in file_list:
             logging.info("OPENING - " + file.name)
