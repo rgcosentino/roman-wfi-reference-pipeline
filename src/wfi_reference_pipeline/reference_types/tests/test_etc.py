@@ -1,7 +1,4 @@
-import numpy as np
 import pytest
-from pathlib import Path
-import yaml
 
 from wfi_reference_pipeline.constants import REF_TYPE_ETC, REF_TYPE_EPSF
 from wfi_reference_pipeline.reference_types.exposure_time_calculator.exposure_time_calculator import ExposureTimeCalculator
