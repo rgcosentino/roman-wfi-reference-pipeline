@@ -9,7 +9,7 @@ import numpy as np
 import roman_datamodels as rdm
 import yaml
 from crds.client import api
-from roman_datamodels.datamodels import EtcRefModel     # need roman_datamodels >= 0.31.0
+from roman_datamodels.datamodels import EtcRefModel  # need roman_datamodels >= 0.31.0
 
 from wfi_reference_pipeline.resources.wfi_meta_exposure_time_calculator import (
     WFIMetaETC,
