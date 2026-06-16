@@ -1,8 +1,5 @@
 from astropy import units as u
 
-from src.wfi_reference_pipeline.resources.wfi_meta_inverse_linearity import (
-    WFIMetaInverseLinearity,
-)
 from wfi_reference_pipeline.constants import (
     REF_TYPE_ABVEGAMAGNITUDEOFFSET,
     REF_TYPE_APERTURECORRECTION,
@@ -56,6 +53,9 @@ from wfi_reference_pipeline.resources.wfi_meta_integral_non_linearity import (
 )
 from wfi_reference_pipeline.resources.wfi_meta_inter_pixel_capacitance import (
     WFIMetaInterPixelCapacitance,
+)
+from wfi_reference_pipeline.resources.wfi_meta_inverse_linearity import (
+    WFIMetaInverseLinearity,
 )
 from wfi_reference_pipeline.resources.wfi_meta_linearity import WFIMetaLinearity
 from wfi_reference_pipeline.resources.wfi_meta_mask import WFIMetaMask
