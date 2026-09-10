@@ -7,6 +7,7 @@ from roman_datamodels.datamodels import DistortionRefModel
 from astropy import units as u
 from astropy.modeling.models import Mapping, Polynomial2D, Shift
 import pysiaf
+from pysiaf.aperture import DISTORTION_ATTRIBUTES
 import logging
 
 from ..reference_type import ReferenceType
@@ -45,7 +46,65 @@ class Distortion(ReferenceType):
 
         logging.debug(f"Default distortion reference file object: {outfile} ")
 
+    def get_astropy_polynomial_coeffs(self, aperture, seed):
+        """
+        Convert pysiaf Roman SIAF polynomial coefficients into the
+        keyword dictionary expected by astropy.modeling.Polynomial2D.
 
+        Parameters
+        ----------
+        aperture : pysiaf.aperture.RomanAperture
+            SIAF aperture.
+
+        seed : str
+            One of:
+                'Sci2IdlX'
+                'Sci2IdlY'
+                'Idl2SciX'
+                'Idl2SciY'
+
+        Returns
+        -------
+        dict
+            Dictionary with Astropy Polynomial2D coefficient names.
+        """
+        degree = aperture.Sci2IdlDeg
+        number_of_coefficients = (degree + 1) * (degree + 2) // 2
+
+        result = {}
+
+        attributes = [
+            attr for attr in DISTORTION_ATTRIBUTES
+            if attr.startswith(seed)
+        ][:number_of_coefficients]
+
+        for attr in attributes:
+            # SIAF naming:
+            #
+            #     X00 -> c0_0
+            #     X10 -> c1_0
+            #     X11 -> c0_1
+            #     X20 -> c2_0
+            #     X21 -> c1_1
+            #     X22 -> c0_2
+            #     X30 -> c3_0
+            #     X31 -> c2_1
+            #     X32 -> c1_2
+            #     X33 -> c0_3
+            #
+            # In general, SIAF Xij maps to Astropy c(i-j)_j.
+
+            ij = attr[len(seed):]
+
+            i = int(ij[0])
+            j = int(ij[1])
+
+            x_power = i - j
+            y_power = j
+
+            result[f'c{x_power}_{y_power}'] = getattr(aperture, attr)
+
+        return result
 
     def make_siaf_distortion(self, detector):
         """
@@ -64,24 +123,39 @@ class Distortion(ReferenceType):
         -------
         None
         """
-        # Read in the Roman SIAF. Use the default version from soc_roman_tools.
-        siaf_data = pysiaf.siaf.Siaf('roman', 
-                                     filename='newsiaf_20260727.xml', 
-                                     basepath='/grp/roman/RFP/DEV/build_files/Build_26Q4_B23/', 
-                                     AperNames=None)
-        # instrument = 'roman', filename = xml file name, basepath = path to where xml file is but without file name
-        #siaf_data = siaf.RomanSiaf().read_roman_siaf()
+        # Read in the Roman SIAF.
+        siaf_data = pysiaf.siaf.Siaf(
+            'roman',
+            filename='newsiaf_20260727.xml',
+            basepath='/grp/roman/RFP/DEV/build_files/Build_26Q4_B23/',
+            AperNames=None
+        )
+
         aperture = siaf_data[f'{detector}_FULL']
 
-        # Find the shift between (x_sci, y_sci) = (0, 0) and the reference location.
+        # Find the shift between (x_sci, y_sci) = (0, 0)
+        # and the reference location.
         x_center = Shift(-aperture.XSciRef)
         y_center = Shift(-aperture.YSciRef)
 
-        # Retrieve the distortion coefficients. We define the forward coefficients
-        # to be Sci -> Idl and the inverse to be Idl -> Sci. We need both sets
-        # of coefficients.
-        x_for, y_for = pysiaf.get_distortion_coeffs(f'{detector}_FULL')
-        x_inv, y_inv = pysiaf.get_distortion_coeffs(f'{detector}_FULL', inverse=True)
+        # Retrieve the distortion coefficients.
+        #
+        # Current pysiaf returns the SIAF coefficients as NumPy arrays.
+        # Convert them to the coefficient dictionaries expected by
+        # astropy.modeling.Polynomial2D.
+        x_for = self.get_astropy_polynomial_coeffs(
+            aperture, 'Sci2IdlX'
+        )
+        y_for = self.get_astropy_polynomial_coeffs(
+            aperture, 'Sci2IdlY'
+        )
+
+        x_inv = self.get_astropy_polynomial_coeffs(
+            aperture, 'Idl2SciX'
+        )
+        y_inv = self.get_astropy_polynomial_coeffs(
+            aperture, 'Idl2SciY'
+        )
 
         # Retrieve V frame information.
         v3_angle = np.radians(aperture.V3IdlYAngle)
