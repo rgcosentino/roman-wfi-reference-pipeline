@@ -95,7 +95,12 @@ class PixelArea(ReferenceType):
         # siaf_data = pysiaf.siaf.Siaf(instrument, filename=None, basepath=None, AperNames=None)
         # instrument = 'roman', filename = xml file name, basepath = path to where xml file is but without file name
 
-        self.siaf = pysiaf.Siaf("Roman")
+        self.siaf = pysiaf.siaf.Siaf(
+            'roman',
+            filename='newsiaf_20260727.xml',
+            basepath='/grp/roman/RFP/DEV/build_files/Build_26Q4_B23/',
+            AperNames=None
+        )
 
         detector = self.meta_data.instrument_detector
 
@@ -340,3 +345,4 @@ class PixelArea(ReferenceType):
         )
 
         return np.abs(jacobian)
+    

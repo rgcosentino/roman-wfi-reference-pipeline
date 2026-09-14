@@ -28,13 +28,14 @@ class Distortion(ReferenceType):
                  bit_mask=None, 
                  outfile=None,
                  clobber=False):
-        # If no output file name given, set default file name.
-        self.outfile = outfile if outfile else 'roman_distortion.asdf'
 
         # Access methods of base class ReferenceType
         super(Distortion, self).__init__(meta_data,  
                                          bit_mask=bit_mask,
                                          clobber=clobber)
+
+        # If no output file name given, set default file name.
+        self.outfile = outfile if outfile else 'roman_distortion.asdf'
 
         # Default meta creation for module specific ref type.
         if not isinstance(meta_data, WFIMetaDistortion):
