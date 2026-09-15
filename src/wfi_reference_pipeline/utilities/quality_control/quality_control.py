@@ -33,10 +33,14 @@ class QualityControl(_ObjectConfig):
                     dqinit: true
                     saturation: true
                     refpix: true
+                    darkdecay: true
+                    wfi18transient: true
         Then our QC object will generate:
             qc.prep_pipeline.checks.dqinit == true
             qc.prep_pipeline.checks.saturation == true
             qc.prep_pipeline.checks.refpix == true
+            qc.prep_pipeline.checks.darkdecay == true
+            qc.prep_pipeline.checks.wfi18transient == true
 
     Input Parameters:
         ref_type: reference type from constants.py
