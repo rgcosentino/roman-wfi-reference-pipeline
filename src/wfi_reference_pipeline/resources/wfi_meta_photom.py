@@ -29,6 +29,6 @@ class WFIMetaPhotom(WFIMetadata):
             'origin': self.origin,
             'instrument': {'name': self.instrument,
                            'detector': self.instrument_detector
-                           },
+                            },
         }
         return asdf_meta
