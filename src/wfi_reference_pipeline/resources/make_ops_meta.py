@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
-
+import warnings
 from astropy import units as u
 
 from wfi_reference_pipeline.constants import (
     DEFAULT_DESCRIPTION,
+    DEFAULT_DESCRIPTION_SENTINEL,
+    REF_TYPE_DESCRIPTION,
     REF_TYPE_DARK,
     REF_TYPE_DARKDECAYSIGNAL,
-    REF_TYPE_DESCRIPTION,
     REF_TYPE_DETECTORSTATUS,
     REF_TYPE_EPSF,
     REF_TYPE_ETC,
@@ -64,6 +65,9 @@ from wfi_reference_pipeline.resources.wfi_meta_referencepixel import (
 )
 from wfi_reference_pipeline.resources.wfi_meta_saturation import WFIMetaSaturation
 
+
+ROUTINE_DELIVERY_CADENCES = {"weekly", "monthly"}
+CADENCE_DAYS = {"weekly": 7, "monthly": 30}
 
 class MakeOpsMeta:
     """
@@ -210,7 +214,13 @@ class MakeOpsMeta:
     def _create_ops_meta_saturation(self, meta_data):
         self.meta_saturation = WFIMetaSaturation(*meta_data)
 
-    def __init__(self, ref_type, routine_delivery_type=True):
+    def __init__(
+        self,
+        ref_type,
+        routine_delivery_cadence="weekly",
+        use_after_date=None,
+        num_files=None,
+    ):
         """
         Generates a reference type specific MetaData object relevant to the ref_type
         parameter.
@@ -220,13 +230,20 @@ class MakeOpsMeta:
         ref_type: str;
             String defining the reference file type which will determine the reference
             meta object created.
-        routine_delivery_type: boolean;
-            A True or False setting for routine high cadence delivery by the RFP, such 
-            as weekly darks or monthly flats, vs low cadence once a year deliveries such
-            as yearly linearity reference file.
-            #TODO Work out with service accounts and automated pipeline run starts. Consider
-            using either routine = True, or have a cadence variable like weekly, monthly or other.
-
+        routine_delivery_cadence: str or None;
+            One of "weekly" or "monthly" for automated, high-cadence RFP deliveries
+            (e.g. weekly darks, monthly flats). The use_after date is derived
+            automatically as 7 or 30 days back from now, respectively.
+            Pass None for low-cadence, non-automated deliveries (e.g. yearly
+            linearity reference files); in that case use_after_date must be
+            supplied manually.
+        use_after_date: str, optional;
+            Manually specified use_after date, formatted as "%Y-%m-%dT%H:%M:%S.000".
+            Required when routine_delivery_cadence is None. Ignored otherwise.
+        num_files: int, optional;
+            Number of reference files included in this delivery. Used to populate the
+            reason-for-delivery string.
+        
         description notes:
 
         This first bit below is for standard routine deliveries and is the reason for delivery
@@ -251,51 +268,67 @@ class MakeOpsMeta:
             "focal plane electronics."
         """
 
-        # TODO check how to assign useafter to ref files taken throughout the week
-        date_now = datetime.now().replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
-        date_start = date_now - timedelta(days=7)
+        date_now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+        if routine_delivery_cadence is not None:
+            if routine_delivery_cadence not in ROUTINE_DELIVERY_CADENCES:
+                raise ValueError(
+                    f"routine_delivery_cadence must be one of "
+                    f"{sorted(ROUTINE_DELIVERY_CADENCES)} or None, "
+                    f"got {routine_delivery_cadence!r}."
+                )
+            date_start = date_now - timedelta(days=CADENCE_DAYS[routine_delivery_cadence])
+            try:
+                use_after = date_start.strftime("%Y-%m-%dT%H:%M:%S.000")
+            except (AttributeError, ValueError):
+                use_after = "2026-12-01T00:00:00.000"
+        else:
+            if use_after_date is None:
+                raise ValueError(
+                    "use_after_date must be provided manually when "
+                    "routine_delivery_cadence is None (non-automated delivery)."
+                )
+            use_after = use_after_date
+            # still need a date_start for the reason-for-delivery string below;
+            # non-automated deliveries don't have a fixed lookback window, so
+            # fall back to whatever use_after was given
+            date_start = datetime.strptime(use_after, "%Y-%m-%dT%H:%M:%S.000")
 
         ref_type_name = REF_TYPE_DESCRIPTION[ref_type]
 
+        file_count = num_files if num_files is not None else "18"
 
-        if routine_delivery_type:
+        if routine_delivery_cadence is not None:
             reason_for_delivery_string = (
-                f"Delivering (18) new WFI {ref_type_name} reference files for imaging "
-                f"and spectral modes, WIM and WSM. "
-                f"This is a routine {ref_type_name} reference file "
-                f"delivery for data from {date_start:%Y-%m-%d} through "
+                f"Delivering ({file_count}) new WFI {ref_type_name} reference files for "
+                f"imaging and spectral modes, WIM and WSM. "
+                f"This is a {routine_delivery_cadence} routine {ref_type_name} reference "
+                f"file delivery for data from {date_start:%Y-%m-%d} through "
                 f"{date_now:%Y-%m-%d}. "
             )
         else:
             reason_for_delivery_string = (
-                f"Delivering (18) new WFI {ref_type_name} reference files for imaging "
-                f"and spectral modes, WIM and WSM. "
+                f"Delivering ({file_count}) new WFI {ref_type_name} reference files for "
+                f"imaging and spectral modes, WIM and WSM. "
                 f"This is a {ref_type_name} reference file "
                 f"delivery for data from {date_start:%Y-%m-%d} through "
                 f"{date_now:%Y-%m-%d}. "
             )
 
         pedigree = "INFLIGHT"
-        description = reason_for_delivery_string + DEFAULT_DESCRIPTION
+        description = DEFAULT_DESCRIPTION.format(
+            ref_type_name=ref_type_name) + reason_for_delivery_string
         author = "RFP Version"
-        try:
-            use_after = date_start.strftime("%Y-%m-%dT%H:%M:%S.000")
-        except (AttributeError, ValueError):
-            use_after = "2026-12-01T00:00:00.000"
         telescope = "ROMAN"
         origin = "STSCI/SOC"
         instrument = "WFI"
         detector = "WFI01"  # Default - needs to be updated and checked for each instance
 
-        """
-        TODO for later - check if default description is still in meta data and wasn't changed. Raise warning or error.
-        if DEFAULT_DESCRIPTION in description:
-            warnings.warn("Using the default placeholder description.")
-        
-        """
-
+        if DEFAULT_DESCRIPTION_SENTINEL in description:
+            warnings.warn(
+                f"Reference file description for {ref_type} still contains the "
+                f"default placeholder sentinel and was not updated before delivery."
+            )
 
         if ref_type not in WFI_REF_TYPES:
             raise ValueError(f"ref_type must be one of: {WFI_REF_TYPES}")
