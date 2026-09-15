@@ -1,13 +1,14 @@
-from datetime import datetime, timedelta
 import warnings
+from datetime import datetime, timedelta
+
 from astropy import units as u
 
 from wfi_reference_pipeline.constants import (
     DEFAULT_DESCRIPTION,
     DEFAULT_DESCRIPTION_SENTINEL,
     REF_TYPE_DARK,
-    REF_TYPE_DESCRIPTION,
     REF_TYPE_DARKDECAYSIGNAL,
+    REF_TYPE_DESCRIPTION,
     REF_TYPE_DETECTORSTATUS,
     REF_TYPE_EPSF,
     REF_TYPE_ETC,
@@ -64,7 +65,6 @@ from wfi_reference_pipeline.resources.wfi_meta_referencepixel import (
     WFIMetaReferencePixel,
 )
 from wfi_reference_pipeline.resources.wfi_meta_saturation import WFIMetaSaturation
-
 
 ROUTINE_DELIVERY_CADENCES = {"weekly", "monthly"}
 CADENCE_DAYS = {"weekly": 7, "monthly": 30}
