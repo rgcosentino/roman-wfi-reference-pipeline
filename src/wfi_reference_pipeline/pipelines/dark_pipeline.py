@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 
 import roman_datamodels as rdm
+from romancal.dark_decay import DarkDecayStep
 from romancal.dq_init import DQInitStep
 from romancal.refpix import RefPixStep
 from romancal.saturation import SaturationStep
-from romancal.dark_decay import DarkDecayStep
 from romancal.wfi18_transient import WFI18TransientStep
 
 from wfi_reference_pipeline.config.config_access import get_pipelines_config
