@@ -19,7 +19,7 @@ QC_CONFIG_SCHEMA_READNOISE = {
                         "saturation",
                         "refpix",
                         "darkdecay",
-                        "wfi18transient"
+                        "wfi18transient",
                         "linearity",
                     ],
                 },

@@ -94,6 +94,9 @@ class QualityControl(_ObjectConfig):
         if type(status) is str:
             if status == "SKIPPED":
                 qc_status = QC_CHECK_INCOMPLETE
+            elif status == 'N/A':
+                # Step not applicable to this detector (e.g. wfi18_transient on non-WFI18)
+                qc_status = QC_CHECK_SUCCEED
             elif status == "INCOMPLETE":
                 qc_status = QC_CHECK_INCOMPLETE
             elif status == "COMPLETE":

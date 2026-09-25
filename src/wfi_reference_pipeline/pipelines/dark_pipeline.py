@@ -133,11 +133,11 @@ class DarkPipeline(Pipeline):
             )
             result = DarkDecayStep.call(result, save_results=False)
             self.qc.update_prep_pipeline_file_status(
-                file, "darkdecay", result.meta.cal_step["darkdecay"]
+                file, "darkdecay", result.meta.cal_step["dark_decay"]
             )
             result = WFI18TransientStep.call(result, save_results=False)
             self.qc.update_prep_pipeline_file_status(
-                file, "wfi18transient", result.meta.cal_step["wfi18transient"]
+                file, "wfi18transient", result.meta.cal_step["wfi18_transient"]
             )
 
             prep_output_file_path = self.file_handler.format_prep_output_file_path(
