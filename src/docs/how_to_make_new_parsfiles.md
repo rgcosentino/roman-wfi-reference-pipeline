@@ -177,9 +177,9 @@ af.write_to("pars-exposurepipeline.asdf")
 
 ## 10. Run STCAL with the PARS File
 
-The pars file itself has the pipeline class to run stcal accordingly. Use the 
-command below and then the pars file on an input asdf file to run the 
-exposure level pipeline with the parameters specified in the pars file.
+ The PARS file identifies the pipeline class for `strun`. Pass the PARS file
+ and an input ASDF file to run the exposure-level pipeline with the specified
+ parameters.
 
 ```python
 strun pars-exposurepipeline.asdf input_uncal.asdf

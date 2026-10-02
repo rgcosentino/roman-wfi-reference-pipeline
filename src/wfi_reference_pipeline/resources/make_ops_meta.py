@@ -131,7 +131,7 @@ class MakeOpsMeta:
         self.meta_etc = WFIMetaETC(*meta_data)
 
     def _create_ops_meta_fgs_mask(self, meta_data):
-        self.meta_etc = WFIMetaFGSMask(*meta_data)
+        self.meta_fgs_mask = WFIMetaFGSMask(*meta_data)
 
     def _create_ops_meta_flat(self, meta_data):
         ref_optical_element = "F158"
@@ -316,8 +316,8 @@ class MakeOpsMeta:
             )
 
         pedigree = "INFLIGHT"
-        description = DEFAULT_DESCRIPTION.format(
-            ref_type_name=ref_type_name) + reason_for_delivery_string
+        description = reason_for_delivery_string + \
+            DEFAULT_DESCRIPTION.format(ref_type_name=ref_type_name) 
         author = "RFP Version"
         telescope = "ROMAN"
         origin = "STSCI/SOC"
