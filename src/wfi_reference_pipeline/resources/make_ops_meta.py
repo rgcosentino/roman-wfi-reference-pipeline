@@ -253,7 +253,7 @@ class MakeOpsMeta:
             "This delivery is a weekly routine dark reference file delivery for data "
             "from 2026-07-08 through 2026-07-15. "
 
-        The next part of the description is for the specific files. Below is a detailed exampled
+        The next part of the description is for the specific files. Below is a detailed example
         of what should be considered the gold standard for RFP and RTB delvieries to CRDS.
             "Dark calibration reference file containing the dark slope, dark slope "
             "error, and DQ arrays derived from the TVAC1 and TVAC2 Thermal Vacuum "
