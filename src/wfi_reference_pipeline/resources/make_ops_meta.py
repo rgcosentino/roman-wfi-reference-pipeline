@@ -75,7 +75,7 @@ class MakeOpsMeta:
 
     Example Usage:
     from wfi_reference_pipeline.resources.make_ops_meta import MakeOpsMeta
-    ops_meta_maker = MakeOpsMeta("DARK")
+    ops_meta_maker = MakeOpsMeta("DARK", "WFI07")
     dark_meta_data = ops_meta_maker.meta_dark
     """
 
@@ -217,6 +217,7 @@ class MakeOpsMeta:
     def __init__(
         self,
         ref_type,
+        detector,
         routine_delivery_cadence="weekly",
         use_after_date=None,
         num_files=None,
@@ -230,6 +231,9 @@ class MakeOpsMeta:
         ref_type: str;
             String defining the reference file type which will determine the reference
             meta object created.
+        detector: str;
+            WFI detector identifier, e.g. "WFI01" through "WFI18". Must be one of
+            WFI_DETECTORS in constants.py. Required; there is no default.
         routine_delivery_cadence: str or None;
             One of "weekly" or "monthly" for automated, high-cadence RFP deliveries
             (e.g. weekly darks, monthly flats). The use_after date is derived
@@ -267,6 +271,14 @@ class MakeOpsMeta:
             "Operations environmental plateau using the flight detectors and flight "
             "focal plane electronics."
         """
+
+        if ref_type not in WFI_REF_TYPES:
+            raise ValueError(f"ref_type must be one of: {WFI_REF_TYPES}")
+
+        if detector not in WFI_DETECTORS:
+            raise ValueError(
+                f"detector must be one of: {WFI_DETECTORS}, got {detector!r}."
+            )
 
         date_now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
@@ -322,7 +334,6 @@ class MakeOpsMeta:
         telescope = "ROMAN"
         origin = "STSCI/SOC"
         instrument = "WFI"
-        detector = "WFI01"  # Default - needs to be updated and checked for each instance
 
         if DEFAULT_DESCRIPTION_SENTINEL in description:
             warnings.warn(
@@ -330,12 +341,8 @@ class MakeOpsMeta:
                 f"default placeholder sentinel and was not updated before delivery."
             )
 
-        if ref_type not in WFI_REF_TYPES:
-            raise ValueError(f"ref_type must be one of: {WFI_REF_TYPES}")
         if pedigree not in WFI_PEDIGREE:
             raise ValueError(f"pedigree must be one of: {WFI_PEDIGREE}")
-        if detector not in WFI_DETECTORS:
-            raise ValueError(f"detector must be one of: {WFI_DETECTORS}")
 
         meta_data_params = [ref_type, pedigree, description, author,
                             use_after, telescope, origin, instrument, detector]
