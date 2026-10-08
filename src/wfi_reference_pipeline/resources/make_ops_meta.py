@@ -217,10 +217,10 @@ class MakeOpsMeta:
     def __init__(
         self,
         ref_type,
-        detector,
+        instrument_detector,
         routine_delivery_cadence="weekly",
+        num_files=18,
         use_after_date=None,
-        num_files=None,
     ):
         """
         Generates a reference type specific MetaData object relevant to the ref_type
@@ -241,12 +241,14 @@ class MakeOpsMeta:
             Pass None for low-cadence, non-automated deliveries (e.g. yearly
             linearity reference files); in that case use_after_date must be
             supplied manually.
+        num_files: int, defailt=18;
+            Number of reference files included in this delivery. Used to populate the
+            reason-for-delivery string. Default set to 18. 
+            #TODO Quality Control needs to update meta with override if only 17 files passed QC
         use_after_date: str, optional;
             Manually specified use_after date, formatted as "%Y-%m-%dT%H:%M:%S.000".
             Required when routine_delivery_cadence is None. Ignored otherwise.
-        num_files: int, optional;
-            Number of reference files included in this delivery. Used to populate the
-            reason-for-delivery string.
+
         
         description notes:
 
@@ -275,9 +277,9 @@ class MakeOpsMeta:
         if ref_type not in WFI_REF_TYPES:
             raise ValueError(f"ref_type must be one of: {WFI_REF_TYPES}")
 
-        if detector not in WFI_DETECTORS:
+        if instrument_detector not in WFI_DETECTORS:
             raise ValueError(
-                f"detector must be one of: {WFI_DETECTORS}, got {detector!r}."
+                f"detector must be one of: {WFI_DETECTORS}, got {instrument_detector!r}."
             )
 
         date_now = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -308,11 +310,9 @@ class MakeOpsMeta:
 
         ref_type_name = REF_TYPE_DESCRIPTION[ref_type]
 
-        file_count = num_files if num_files is not None else "18"
-
         if routine_delivery_cadence is not None:
             reason_for_delivery_string = (
-                f"Delivering ({file_count}) new WFI {ref_type_name} reference files for "
+                f"Delivering ({num_files}) new WFI {ref_type_name} reference files for "
                 f"imaging and spectral modes, WIM and WSM. "
                 f"This is a {routine_delivery_cadence} routine {ref_type_name} reference "
                 f"file delivery for data from {date_start:%Y-%m-%d} through "
@@ -320,7 +320,7 @@ class MakeOpsMeta:
             )
         else:
             reason_for_delivery_string = (
-                f"Delivering ({file_count}) new WFI {ref_type_name} reference files for "
+                f"Delivering ({num_files}) new WFI {ref_type_name} reference files for "
                 f"imaging and spectral modes, WIM and WSM. "
                 f"This is a {ref_type_name} reference file "
                 f"delivery for data from {date_start:%Y-%m-%d} through "
@@ -345,7 +345,7 @@ class MakeOpsMeta:
             raise ValueError(f"pedigree must be one of: {WFI_PEDIGREE}")
 
         meta_data_params = [ref_type, pedigree, description, author,
-                            use_after, telescope, origin, instrument, detector]
+                            use_after, telescope, origin, instrument, instrument_detector]
 
         if ref_type == REF_TYPE_DARK:
             self._create_ops_meta_dark(meta_data_params)
