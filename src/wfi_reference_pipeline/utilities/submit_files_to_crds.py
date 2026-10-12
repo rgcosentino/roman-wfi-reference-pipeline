@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from crds.certify import certify_files
 from crds.core import heavy_client
 from crds.submit import Submission
+
 from wfi_reference_pipeline.constants import WFI_REF_TYPES
 
 from ..config.config_access import get_crds_submission_config
@@ -56,7 +57,6 @@ class SubmissionForm:
         crds_submission_config = get_crds_submission_config()["submission_form"]
         for key, value in crds_submission_config.items():
             setattr(self, key, value)
-
 
     def as_dict(self) -> dict:
         return self.__dict__
@@ -154,7 +154,9 @@ class WFISubmit:
         Check if any string fields have the placeholder value 'User updated information.'
         """
         default_str = "User updated information."
-        placeholders = [key for key, value in self.submission_dict.items() if value == default_str]
+        placeholders = [
+            key for key, value in self.submission_dict.items() if value == default_str
+        ]
         if placeholders:
             raise ValueError(
                 f"The following have not been updated from their default value: {', '.join(placeholders)}"
