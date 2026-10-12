@@ -67,7 +67,7 @@ class WFISubmit:
         """
         Initialize the submission process with file checks and configuration.
         """
-        if isinstance(files, list) or isinstance(files, tuple):
+        if isinstance(files, (list, tuple)):
             if len(files) > 0:
                 self.files = files
             else:
@@ -105,9 +105,8 @@ class WFISubmit:
         """
         print(self.crds_submission_form.help())
 
-    def certify_files(self):
+    def certify_reference_files(self):
         """
-        # TODO SAPP - EVALUATE THIS
         Certify the reference files before submission.
         """
         cert_files = [f if "/" in f else f"./{f}" for f in self.files]
@@ -125,7 +124,7 @@ class WFISubmit:
 
         self._check_for_default_strings()
         self._confirm_submission_file_type_is_rfp_ref_type()
-        for key in self.crds_submission_form.keys():
+        for key in self.crds_submission_form:
             try:
                 self.crds_submission_form[key] = self.submission_dict[key]
             except KeyError:
@@ -166,19 +165,18 @@ class WFISubmit:
 
     def _confirm_ref_type_files_match_submission(self):
         """
-        # TODO
-        Write code to open each file that is being add and check the ref_type matches
+        Open each file that is being add and check the ref_type matches
         the reference file type in the submission form.
         """
-
+        # SAPP TODO DO THIS, THEN UPDATE SCRIPT WITH DEFAULT STUFF AND MOVE TO EXAMPLES SO OTHERS CAN USE IT.
         pass
 
     def _set_env_variables(self):
         """
-        # TODO Investigate why attribute self.server being set to "ops" did not deliver to ops or was over-written by the environment variable.
-            These ENV variables need to bet set before crds is imported.  Which means early in the pipeline
+        These ENV variables need to be set before crds is imported, so as install instructions or during pipeline initialization.
         Additionally, the user will need to refresh or regenerate a valid MAST Token that is also an environment
         variable
+
         https://auth.mast.stsci.edu/tokens
         export MAST_API_TOKEN="12345678StringExample@#$%!"
 
@@ -233,17 +231,11 @@ class WFISubmit:
             Message to send to the slack channel.
         """
         self.submission_results = self.crds_submission_form.submit()
-        try:
-            if summary:
-                summary += f" Result URL is {self.submission_results.ready_url}"
-            else:
-                summary = "Files have been submitted. No summary provided."
-            # TODO discuss slack and email notifications and configuration file needed.
-            send_slack_message(
-                summary, os.environ["WFI_REFFILE_SLACK_TOKEN"], config_file=None
-            )
-        except KeyError:
-            raise Exception(
-                'No token found in environment variable "WFI_REFFILE_SLACK_TOKEN". '
-                "No Slack message was sent."
-            )
+        if summary:
+            summary += f" Result URL is {self.submission_results.ready_url}"
+        else:
+            summary = "Files have been submitted. No summary provided."
+        # TODO discuss slack and email notifications and configuration file needed.
+        send_slack_message(
+            summary, os.environ["WFI_REFFILE_SLACK_TOKEN"], config_file=None
+        )
