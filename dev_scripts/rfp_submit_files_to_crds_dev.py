@@ -1,6 +1,7 @@
 """
-Example script for submitting reference files to CRDS.
+DEV script for submitting reference files to CRDS.
 This will allow users to test submissions manually.
+Submission will be incorporated in the "post" portion of the pipeline
 """
 
 import glob
