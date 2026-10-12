@@ -8,6 +8,7 @@ import os
 import subprocess
 from dataclasses import dataclass, field
 
+import asdf
 from crds.certify import certify_files
 from crds.core import heavy_client
 from crds.submit import Submission
@@ -124,7 +125,7 @@ class WFISubmit:
 
         self._check_for_default_strings()
         self._confirm_submission_file_type_is_rfp_ref_type()
-        for key in self.crds_submission_form:
+        for key in self.crds_submission_form.keys():
             try:
                 self.crds_submission_form[key] = self.submission_dict[key]
             except KeyError:
@@ -168,8 +169,11 @@ class WFISubmit:
         Open each file that is being add and check the ref_type matches
         the reference file type in the submission form.
         """
-        # SAPP TODO DO THIS, THEN UPDATE SCRIPT WITH DEFAULT STUFF AND MOVE TO EXAMPLES SO OTHERS CAN USE IT.
-        pass
+        for file in self.files:
+            with asdf.open(file, mode="r", lazy_load=True) as af:
+                file_ref_type = af.tree["roman"]["meta"]["reftype"]
+                if file_ref_type != self.submission_file_ref_type:
+                    raise ValueError(f"The reference type in '{file}' is '{file_ref_type}' - expecting '{self.submission_file_ref_type}'")
 
     def _set_env_variables(self):
         """
