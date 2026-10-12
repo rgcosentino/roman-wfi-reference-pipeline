@@ -21,6 +21,7 @@ META_FIELDS = {
     "detector": ("instrument", "detector"),
     "instrument_name": ("instrument", "name"),
     "optical_element": ("instrument", "optical_element"),
+    "p_optical_element": ("instrument", "p_optical_element"),
     "exptype": ("exposure", "type"),
     "p_exptype": ("exposure", "p_exptype"),
     "input_units": ("input_units",),
@@ -34,11 +35,11 @@ def get_nested_value(meta, path, default="N/A"):
 
     Parameters
     ----------
-    meta : dict-like
+    meta: dict-like
         Roman metadata tree.
-    path : tuple
+    path: tuple
         Tuple describing the path to the desired value.
-    default : object
+    default: object
         Value returned if the key doesn't exist.
 
     Returns
@@ -64,7 +65,7 @@ def make_manifest(files):
 
     Parameters
     ----------
-    files : list[str]
+    files: list[str]
         List of ASDF reference files.
 
     Returns
@@ -119,9 +120,6 @@ def make_manifest(files):
 def print_manifest(df):
     """
     Print metadata for each file.
-
-
-
     """
     for _, row in df.iterrows():
         print(f"File: {row['file']}")
@@ -140,3 +138,4 @@ def print_meta_fields_together(df):
         for value in df[column]:
             print(f"  {value}")
         print("-" * 60)
+        
