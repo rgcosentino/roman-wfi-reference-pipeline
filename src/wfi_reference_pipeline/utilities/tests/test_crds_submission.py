@@ -4,7 +4,6 @@ import tempfile
 import pytest
 
 from wfi_reference_pipeline.utilities.submit_files_to_crds import (
-    SubmissionForm,
     WFISubmit,
 )
 
@@ -102,29 +101,3 @@ def test_exceptions(temp_file):
     # Form details not supplied.
     with pytest.raises(ValueError):
         _ = WFISubmit([], form_info=None)
-
-
-def test_submission_form_good_config_passes(monkeypatch):
-
-    monkeypatch.setattr(
-        "wfi_reference_pipeline.utilities.submit_files_to_crds.get_crds_submission_config",
-        lambda: full_config,
-    )
-
-    submission_form = SubmissionForm()
-
-    for key, value in full_config["submission_form"].items():
-        submission_form_value = getattr(submission_form, key)
-        assert submission_form_value == value
-
-
-def test_submission_form_incomplete_config_passes(monkeypatch):
-    monkeypatch.setattr(
-        "wfi_reference_pipeline.utilities.submit_files_to_crds.get_crds_submission_config",
-        lambda: partial_config,
-    )
-    submission_form = SubmissionForm()
-
-    assert submission_form.deliverer == partial_config["submission_form"]["deliverer"]
-    # Test default value
-    assert submission_form.change_level == "MODERATE"

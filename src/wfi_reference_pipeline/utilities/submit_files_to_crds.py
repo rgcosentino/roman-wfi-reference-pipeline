@@ -6,7 +6,6 @@ the information for the reference file submission.
 import logging
 import os
 import subprocess
-from dataclasses import dataclass, field
 
 import asdf
 from crds.certify import certify_files
@@ -17,52 +16,6 @@ from wfi_reference_pipeline.constants import WFI_REF_TYPES
 
 from ..config.config_access import get_crds_submission_config
 from .notifications import send_slack_message
-
-
-@dataclass(init=True, repr=True)
-class SubmissionForm:
-    deliverer: str = field(default="WFI Reference File Pipeline")
-    other_email: str = field(default="")
-    instrument: str = field(default="WFI")
-    file_type: str = field(default="REF_TYPE")
-    history_updated: bool = field(default=True)
-    pedigree_updated: bool = field(default=True)
-    keywords_checked: bool = field(default=True)
-    descrip_updated: bool = field(default=True)
-    useafter_updated: bool = field(default=True)
-    useafter_matches: str = field(default="N/A")
-    compliance_verified: str = field(default="N/A")
-    etc_delivery: bool = field(default=False)
-    calpipe_version: str = field(default="No")
-    replacement_files: bool = field(default=False)
-    old_reference_files: str | list = field(default="")
-    replacing_badfiles: str = field(default="No")
-    jira_issue: str | list = field(default="")
-    table_rows_changed: str = field(default="N/A")
-    reprocess_affected: bool = field(default=False)
-    modes_affected: str = field(default="")
-    change_level: str = field(default="SEVERE")
-    correctness_testing: str = field(default="None")
-    additional_considerations: str = field(default="None")
-    description: str = field(default="")
-
-    def __post_init__(self):
-
-        self._fill_submission_form_with_crds_config()
-
-    def _fill_submission_form_with_crds_config(self):
-        """
-        The dataclass already has defaults set, they should each be replaced with the crds submission_form
-        values.  If for some reason that value doesn't exist, the default value will remain unchanged.
-        """
-        crds_submission_config = get_crds_submission_config()["submission_form"]
-        for key, value in crds_submission_config.items():
-            if key not in self.__dataclass_fields__:
-                 raise ValueError(f"Unknown crds_submission_config field: {key}")
-            setattr(self, key, value)
-
-    def as_dict(self) -> dict:
-        return self.__dict__
 
 
 class WFISubmit:
@@ -235,6 +188,7 @@ class WFISubmit:
         summary: str; default = None
             Message to send to the slack channel.
         """
+        # TODO: Enable Auto Submission through self.crds_submission_form once available.
         self.submission_results = self.crds_submission_form.submit()
         if summary:
             summary += f" Result URL is {self.submission_results.ready_url}"
