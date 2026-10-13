@@ -41,7 +41,7 @@ class SubmissionForm:
     table_rows_changed: str = field(default="N/A")
     reprocess_affected: bool = field(default=False)
     modes_affected: str = field(default="")
-    change_level: str = field(default="MODERATE")
+    change_level: str = field(default="SEVERE")
     correctness_testing: str = field(default="None")
     additional_considerations: str = field(default="None")
     description: str = field(default="")
@@ -57,6 +57,8 @@ class SubmissionForm:
         """
         crds_submission_config = get_crds_submission_config()["submission_form"]
         for key, value in crds_submission_config.items():
+            if key not in self.__dataclass_fields__:
+                 raise ValueError(f"Unknown crds_submission_config field: {key}")
             setattr(self, key, value)
 
     def as_dict(self) -> dict:
@@ -133,8 +135,8 @@ class WFISubmit:
 
         # Attach the reference files being delivered.
         for f in self.files:
+            self._confirm_ref_type_files_match_submission(f)
             self.crds_submission_form.add_file(f)
-            self._confirm_ref_type_files_match_submission()
 
     def _confirm_submission_file_type_is_rfp_ref_type(self):
         """
@@ -164,16 +166,15 @@ class WFISubmit:
         else:
             print("All fields are correctly updated.")
 
-    def _confirm_ref_type_files_match_submission(self):
+    def _confirm_ref_type_files_match_submission(self, file):
         """
-        Open each file that is being add and check the ref_type matches
+        Open each file that is being added and check the ref_type matches
         the reference file type in the submission form.
         """
-        for file in self.files:
-            with asdf.open(file, mode="r", lazy_load=True) as af:
-                file_ref_type = af.tree["roman"]["meta"]["reftype"]
-                if file_ref_type != self.submission_file_ref_type:
-                    raise ValueError(f"The reference type in '{file}' is '{file_ref_type}' - expecting '{self.submission_file_ref_type}'")
+        with asdf.open(file, mode="r", lazy_load=True) as af:
+            file_ref_type = af.tree["roman"]["meta"]["reftype"]
+            if file_ref_type != self.submission_file_ref_type:
+                raise ValueError(f"The reference type in '{file}' is '{file_ref_type}' - expecting '{self.submission_file_ref_type}'")
 
     def _set_env_variables(self):
         """

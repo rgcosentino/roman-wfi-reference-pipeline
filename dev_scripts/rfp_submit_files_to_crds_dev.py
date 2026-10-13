@@ -16,7 +16,7 @@ from wfi_reference_pipeline.utilities.manifest import (
 from wfi_reference_pipeline.utilities.submit_files_to_crds import WFISubmit
 
 # NOTE: These are the variables to change
-# Change to True to complete submission info (you should also manualy update the submission information below if update_dict == True)
+# Change to True to complete submission info (you should also manually update the submission information below if update_dict == True)
 update_dict = True
 # Gather new files based on the pattern in the config file, update to grab the file(s) you are looking for that exist inside the rfp_output_dir_root.
 filter_for_file = "*mask2_WFI01.asdf"
