@@ -127,7 +127,9 @@ class WFISubmit:
         with asdf.open(file, mode="r", lazy_load=True) as af:
             file_ref_type = af.tree["roman"]["meta"]["reftype"]
             if file_ref_type != self.submission_file_ref_type:
-                raise ValueError(f"The reference type in '{file}' is '{file_ref_type}' - expecting '{self.submission_file_ref_type}'")
+                raise ValueError(
+                    f"The reference type in '{file}' is '{file_ref_type}' - expecting '{self.submission_file_ref_type}'"
+                )
 
     def _set_env_variables(self):
         """
@@ -189,6 +191,7 @@ class WFISubmit:
             Message to send to the slack channel.
         """
         # TODO: Enable Auto Submission through self.crds_submission_form once available.
+        # self.crds_submission_form.auto_confirm = True
         self.submission_results = self.crds_submission_form.submit()
         if summary:
             summary += f" Result URL is {self.submission_results.ready_url}"
