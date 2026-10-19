@@ -40,38 +40,56 @@ class ReferenceType(ABC):
 
     Parameters
     ----------
-    meta_data : object
+    meta_data: object
         Reference type specific meta data object.
-    file_list : list or None, optional
+    file_list: list or None, optional
         List of files to be used for creating the reference file.
-    ref_type_data : numpy.ndarray or None, optional
+    ref_type_data: numpy.ndarray or None, optional
         Data array for the reference type.
-    bit_mask : numpy.ndarray or None, optional
+    bit_mask: numpy.ndarray or None, optional
         Bit mask array corresponding to the data. If provided, it should match the shape of `ref_type_data`.
-    outfile : str or None, optional
+    outfile: str or None, optional
         Path to the output file where the reference data will be saved.
-    clobber : bool, optional
+    clobber: bool, optional
         If True, overwrites the existing outfile without warning.
-    mask_size : tuple, optional
+    mask_size: tuple, optional
         Expected detector dimensions.
-    get_crds_mask : bool, optional
+    get_crds_mask: bool, optional
         If True, retrieve the CRDS MASK reference file for
         ``meta_data.instrument_detector`` and store its DQ array in
         ``self.crds_bad_pixel_map``. Default False.
-    crds_context : str or None, optional
+    crds_context: str or None, optional
         CRDS context used when retrieving CRDS reference files, e.g.
         ``'roman_0042.pmap'``. Defaults to the latest operational context.
 
 
     Attributes
     ----------
-    crds_bad_pixel_map : numpy.ndarray or None
+    meta_data: object
+        The reference type specific meta data object passed in. If
+        ``meta_data.use_after`` was given as a string, it has been converted
+        to an ``astropy.time.Time`` object.
+    file_list: list or None
+        The ``file_list`` passed in.
+    outfile: str or None
+        Path of the output reference file.
+    clobber: bool
+        Whether an existing ``outfile`` is overwritten.
+    mask_size: tuple
+        Expected detector dimensions, used as the shape of ``dq_mask``.
+    crds_context: str or None
+        The ``crds_context`` passed in. Used by `load_crds_mask` when it is
+        called without its own context.
+    dqflag_defs: roman_datamodels.dqflags.pixel
+        Pixel data quality flag definitions from ``roman_datamodels``.
+    dq_mask: numpy.ndarray
+        uint32 data quality mask. The ``bit_mask`` passed in, or an array of
+        zeros with shape ``mask_size`` if none was given.
+    crds_bad_pixel_map: numpy.ndarray or None
         uint32 DQ array from the CRDS MASK file, shape (4096, 4096).
         None unless ``get_crds_mask=True`` or `load_crds_mask` was called.
-    crds_mask_file : str or None
+    crds_mask_file: str or None
         Local path of the CRDS MASK file that ``crds_bad_pixel_map`` came from.
-    crds_context : str or None
-        The ``crds_context`` passed at instantiation.
 
     Notes
     -----
