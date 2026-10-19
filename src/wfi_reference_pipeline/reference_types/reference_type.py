@@ -21,17 +21,6 @@ from wfi_reference_pipeline.constants import (
 )
 from wfi_reference_pipeline.utilities.crds_utils import load_crds_bad_pixel_map
 
-CRDS_OBSERVATORY = "roman"
-CRDS_MASK_REFTYPE = "mask"
-N_WFI_DETECTORS = 18
-
-# Process-wide caches. Building ReferenceType objects for WFI01..WFI18 in one
-# session triggers a single CRDS sync and a single bulk download of all mask
-# files; every later instance just looks its detector up in the dict.
-_CRDS_SYNCED_CONTEXTS = set()
-_CRDS_MASK_FILES = {}  # {crds_context: {"WFI01": "/local/path/roman_wfi_mask_xxxx.asdf", ...}}
- 
-
 
 class ReferenceType(ABC):
     """
@@ -359,7 +348,41 @@ class ReferenceTypeMask(ABC):
     Attributes
     ----------
     meta_data: object
-
+        The metadata object passed in. Its reference_type is one of
+        WFI_MASK_REF_TYPES.
+    dark_filelist: list or None
+        The ``dark_filelist`` passed in.
+    flat_filelist: list or None
+        The ``flat_filelist`` passed in.
+    super_dark: numpy.ndarray or None
+        The ``input_super_dark`` passed in, or the super dark built from
+        ``dark_filelist`` when none was given.
+    super_rate: numpy.ndarray or None
+        The ``input_super_rate`` passed in, or the super rate image built from
+        ``flat_filelist`` when none was given.
+    mask_image: numpy.ndarray
+        uint32 data quality mask, shape (DETECTOR_PIXEL_Y_COUNT,
+        DETECTOR_PIXEL_X_COUNT). The ``input_user_mask`` passed in, or zeros
+        if none was given. Bad pixels found by the dark / flat workflow are
+        added to it.
+    outfile: str or None
+        Path of the output reference file.
+    clobber: bool
+        Whether an existing ``outfile`` is overwritten.
+    mask_size: tuple
+        Expected detector dimensions.
+    outdir: str
+        Directory of ``outfile``. Intermediate super dark and super rate
+        files are written here.
+    superdark_path: str
+        Path of the super dark file written to ``outdir``. Only set when the
+        super dark is built from ``dark_filelist``.
+    super_rate_path: str
+        Path of the super rate file written to ``outdir``. Only set when the
+        super rate is built from ``flat_filelist``.
+    crds_context: str or None
+        The ``crds_context`` passed in. Used by `load_crds_mask` when it is
+        called without its own context.
     crds_bad_pixel_map: numpy.ndarray or None
         uint32 DQ array from the CRDS MASK file, shape (4096, 4096).
         None unless ``get_crds_mask=True`` or `load_crds_mask` was called.
@@ -426,6 +449,7 @@ class ReferenceTypeMask(ABC):
 
         self.outdir = os.path.dirname(self.outfile)
 
+#TODO consider moving these out of the init method because of how long they take
         # Creating super darks / rates as necessary
         if self.super_dark is None and self.dark_filelist:
             self.super_dark = self._prep_super_dark(self.outdir)
