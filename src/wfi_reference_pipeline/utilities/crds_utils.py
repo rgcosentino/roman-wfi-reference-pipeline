@@ -13,13 +13,13 @@ Requires CRDS_SERVER_URL and CRDS_PATH to be set in the environment.
 import logging
 import os
 import subprocess
- 
+
+import crds
 import numpy as np
 import roman_datamodels as rdm
-import crds
 from crds.client import api
 from crds.core import config as crds_config
- 
+
 CRDS_OBSERVATORY = "roman"
 CRDS_INSTRUMENT = "wfi"
 N_WFI_DETECTORS = 18

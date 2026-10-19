@@ -8,9 +8,6 @@ import numpy as np
 from astropy.stats import sigma_clip
 from astropy.time import Time
 from roman_datamodels import dqflags
-import subprocess
-
-from wfi_reference_pipeline.utilities.crds_utils import load_crds_bad_pixel_map
 
 from wfi_reference_pipeline.constants import (
     DETECTOR_PIXEL_X_COUNT,
@@ -22,6 +19,7 @@ from wfi_reference_pipeline.constants import (
     WFI_MODE_WIM,
     WFI_REF_TYPES_WITHOUT_INPUT_DATA,
 )
+from wfi_reference_pipeline.utilities.crds_utils import load_crds_bad_pixel_map
 
 CRDS_OBSERVATORY = "roman"
 CRDS_MASK_REFTYPE = "mask"
