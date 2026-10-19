@@ -10,6 +10,7 @@ from astropy.time import Time
 from roman_datamodels import dqflags
 import subprocess
 
+from wfi_reference_pipeline.utilities.crds_utils import load_crds_bad_pixel_map
 
 from wfi_reference_pipeline.constants import (
     DETECTOR_PIXEL_X_COUNT,
