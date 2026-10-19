@@ -54,6 +54,31 @@ class ReferenceType(ABC):
         If True, overwrites the existing outfile without warning.
     mask_size : tuple, optional
         Expected detector dimensions.
+    get_crds_mask : bool, optional
+        If True, retrieve the CRDS MASK reference file for
+        ``meta_data.instrument_detector`` and store its DQ array in
+        ``self.crds_bad_pixel_map``. Default False.
+    crds_context : str or None, optional
+        CRDS context used when retrieving CRDS reference files, e.g.
+        ``'roman_0042.pmap'``. Defaults to the latest operational context.
+
+
+    Attributes
+    ----------
+    crds_bad_pixel_map : numpy.ndarray or None
+        uint32 DQ array from the CRDS MASK file, shape (4096, 4096).
+        None unless ``get_crds_mask=True`` or `load_crds_mask` was called.
+    crds_mask_file : str or None
+        Local path of the CRDS MASK file that ``crds_bad_pixel_map`` came from.
+    crds_context : str or None
+        The ``crds_context`` passed at instantiation.
+
+    Notes
+    -----
+    Retrieving the CRDS mask needs CRDS_SERVER_URL and CRDS_PATH set in the
+    environment. The first instance in a Python session syncs CRDS and
+    downloads the MASK files for all 18 detectors; every later instance
+    reuses them without contacting the server.
     """
 
     def __init__(self,
